@@ -3,16 +3,16 @@
 SecureMailHost API.  It should be removed entirely for Plone 5.0."""
 import sys
 from copy import deepcopy
-from email.Utils import formataddr, getaddresses
-from email.Header import Header
-from email.Message import Message
-from email.MIMEText import MIMEText
+from email.header import Header
+from email.message import Message
+from email.mime.text import MIMEText
+from email.utils import formataddr, getaddresses
 from zope.deprecation import deprecate
 from zope.deferredimport.deferredmodule import (ModuleProxy,
                                                 DeferredAndDeprecated, )
 from AccessControl.Permissions import use_mailhost_services
 from AccessControl.SecurityInfo import ClassSecurityInfo
-from App.class_init import InitializeClass
+from AccessControl.class_init import InitializeClass
 from Products.CMFPlone import PloneTool
 from Products.MailHost.MailHost import MailHost, _encode_address_string
 
@@ -48,13 +48,13 @@ def email_list_to_string(addr_list, charset='us-ascii'):
     properly encoded string."""
     if addr_list is None:
         return ''
-    if isinstance(addr_list, basestring):
+    if isinstance(addr_list, str):
         addr_str = addr_list
     else:
         # if the list item is a string include it, otherwise assume it's a
         # (name, address) tuple and turn it into an RFC compliant string
 
-        addresses = (isinstance(a, basestring) and a or formataddr(a)
+        addresses = (isinstance(a, str) and a or formataddr(a)
                      for a in addr_list)
         addr_str = ', '.join(str(_encode_address_string(a, charset))
                              for a in addresses)
@@ -62,7 +62,7 @@ def email_list_to_string(addr_list, charset='us-ascii'):
 
 
 def _addHeaders(message, **kwargs):
-    for key, value in kwargs.iteritems():
+    for key, value in kwargs.items():
         del message[key]
         message[key] = value
 
@@ -83,7 +83,7 @@ def secureSend(self, message, mto, mfrom, subject='[No Subject]',
     # Convert to a message for adding headers.  If it's already a
     # message, copy it to be safe.
     if not isinstance(message, Message):
-        if isinstance(message, unicode):
+        if isinstance(message, str):
             message.encode(charset)
         message = MIMEText(message, subtype, charset)
     else:
@@ -92,7 +92,7 @@ def secureSend(self, message, mto, mfrom, subject='[No Subject]',
     # Add extra headers
     _addHeaders(message, Subject=Header(subject, charset),
                 To=mto, Cc=mcc, From=mfrom,
-                **dict((k, Header(v, charset)) for k, v in kwargs.iteritems()))
+                **dict((k, Header(v, charset)) for k, v in kwargs.items()))
 
     all_recipients = [formataddr(pair) for pair in
                       getaddresses((mto, mcc, mbcc))]
@@ -109,19 +109,23 @@ msg = ('The %(name)s method of the MailHost is deprecated, '
        'Plone 5.')
 
 
+def _unwrap_method(method):
+    return getattr(method, '__func__', method)
+
+
 def applyPatches():
     if not hasattr(MailHost, 'secureSend'):
         pt = PloneTool.PloneTool
         MailHost.secureSend = secureSend
         MailHost.validateSingleNormalizedEmailAddress = deprecate(
             msg % {'name': 'validateSingleNormalizedEmailAddress'})(
-            pt.validateSingleNormalizedEmailAddress.im_func)
+            _unwrap_method(pt.validateSingleNormalizedEmailAddress))
         MailHost.validateSingleEmailAddress = deprecate(
             msg % {'name': 'validateSingleEmailAddress'})(
-            pt.validateSingleEmailAddress.im_func)
+            _unwrap_method(pt.validateSingleEmailAddress))
         MailHost.validateEmailAddresses = deprecate(
             msg % {'name': 'validateEmailAddresses'})(
-            pt.validateEmailAddresses.im_func)
+            _unwrap_method(pt.validateEmailAddresses))
         MailHost.emailListToString = deprecate(
             'The MailHost method emailListToString is deprecated and '
             'will be removed in Plone 5')(
@@ -136,9 +140,9 @@ def applyPatches():
         # Merge old permissions with new permissions
         new_perms = dict(MailHost.__ac_permissions__)
         updated_perms = dict(ORIG_PERMS)
-        for key, value in new_perms.iteritems():
+        for key, value in new_perms.items():
             updated_perms[key] = updated_perms[key] + value
-        MailHost.__ac_permissions__ = tuple(updated_perms.iteritems())
+        MailHost.__ac_permissions__ = tuple(updated_perms.items())
         # apply permisisons settings by reinitializing the class
         InitializeClass(MailHost)
         if not smh_module:
@@ -155,7 +159,7 @@ def removePatches():
         else:
             sys.modules['Products.SecureMailHost.SecureMailHost'] = smh_module
     patched = getattr(MailHost, 'secureSend', None)
-    if patched is not None and patched.im_func is secureSend:
+    if patched is not None and _unwrap_method(patched) is secureSend:
         del MailHost.secureSend
         del MailHost.validateSingleNormalizedEmailAddress
         del MailHost.validateSingleEmailAddress

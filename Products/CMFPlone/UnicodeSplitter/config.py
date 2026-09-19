@@ -14,7 +14,7 @@ rangetable = dict(
     # digit=u"\d",
 
     # U+AC00-D7AF       Hangul Syllables        ハングル音節文字
-    hangul=u"\uAC00-\uD7AF",
+    hangul="\uAC00-\uD7AF",
 
     # U+30A0-30FF       Katakana        片仮名
     # U+3040-309F       Hiragana        平仮名
@@ -27,26 +27,26 @@ rangetable = dict(
     # U+F900-FAFF     CJK Compatibility Ideographs    CJK互換漢字
     # ideo=u"\u4E00-\u9FFF\u3400-\u4DBF\uF900-\uFAFF",
 
-    cj=u"\u3040-\u30FF\u4E00-\u9FFF\u3400-\u4DBF\uF900-\uFAFF",
-    thai=u"\u0E00-\u0E7F",  # U+0E00-0E7F Thai タイ文字
+    cj="\u3040-\u30FF\u4E00-\u9FFF\u3400-\u4DBF\uF900-\uFAFF",
+    thai="\u0E00-\u0E7F",  # U+0E00-0E7F Thai タイ文字
     )
 ## End of setting.
 
 
 ## Splitting core.
-ps = rangetable.values()
-allp = u"".join(ps)
-glob_true = u"[^%s]([^%s]|[\*\?])*|" \
-                % (allp, allp) + u"|".join([u"[%s]+" % (x, ) for x in ps])
+ps = list(rangetable.values())
+allp = "".join(ps)
+glob_true = "[^%s]([^%s]|[\*\?])*|" \
+                % (allp, allp) + "|".join(["[%s]+" % (x, ) for x in ps])
 
-glob_false = u"[^%s]+|" % allp + u"|".join(u"[%s]+" % x for x in ps)
+glob_false = "[^%s]+|" % allp + "|".join("[%s]+" % x for x in ps)
 
-rx_all = re.compile(ur"[%s]" % allp, re.UNICODE)
+rx_all = re.compile(r"[%s]" % allp, re.UNICODE)
 rx_U = re.compile(r"\w+", re.UNICODE)
 rxGlob_U = re.compile(r"\w+[\w*?]*", re.UNICODE)
 
-rx_L = re.compile(r"\w+", re.LOCALE)
-rxGlob_L = re.compile(r"\w+[\w*?]*", re.LOCALE)
+rx_L = re.compile(br"\w+", re.LOCALE)
+rxGlob_L = re.compile(br"\w+[\w*?]*", re.LOCALE)
 
 # pattern = re.compile(u"[a-zA-Z0-9_]+|[\uac00-\ud7af]+|[\u4E00-\u9FFF\u3400-\u4dbf\uf900-\ufaff\u3040-\u30ff]+", re.UNICODE)
 # pattern_g = re.compile(u"[a-zA-Z0-9_]+[*?]*|[\u4E00-\u9FFF\u3400-\u4dbf\uf900-\ufaff\u3040-\u30ff\uac00-\ud7af]+[*?]*", re.UNICODE)

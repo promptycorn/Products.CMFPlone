@@ -1,5 +1,5 @@
 from zope.interface import Attribute
-from basetool import IPloneBaseTool
+from .basetool import IPloneBaseTool
 
 
 class IInterfaceTool(IPloneBaseTool):

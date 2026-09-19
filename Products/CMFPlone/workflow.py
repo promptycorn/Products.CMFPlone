@@ -39,7 +39,7 @@ def ToolWorkflowChain(context, workflow_tool):
       ()
 
     """
-    if isinstance(context, basestring):
+    if isinstance(context, str):
         pt = context
     elif hasattr(aq_base(context), 'getPortalTypeName'):
         pt = context.getPortalTypeName()

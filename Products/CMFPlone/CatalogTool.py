@@ -1,6 +1,6 @@
 import re
 import time
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 from AccessControl import ClassSecurityInfo
 from AccessControl.Permissions import manage_zcatalog_entries as \
@@ -10,13 +10,14 @@ from AccessControl.PermissionRole import rolesForPermissionOn
 from Acquisition import aq_base
 from Acquisition import aq_inner
 from Acquisition import aq_parent
-from App.class_init import InitializeClass
+from AccessControl.class_init import InitializeClass
 from App.special_dtml import DTMLFile
 from BTrees.Length import Length
 from DateTime import DateTime
 from OFS.interfaces import IOrderedContainer
 from plone.indexer import indexer
 from plone.indexer.interfaces import IIndexableObject
+from plone.indexer.wrapper import IndexableObjectWrapper
 from Products.CMFCore.utils import _checkPermission
 from Products.CMFCore.utils import _getAuthenticatedUser
 from Products.CMFCore.utils import getToolByName
@@ -27,7 +28,7 @@ from Products.ZCatalog.ZCatalog import ZCatalog
 from Products.Archetypes.interfaces import IExtensibleMetadata
 from zope.component import queryMultiAdapter
 from zope.interface import Interface
-from zope.interface import implements
+from zope.interface import implementer
 from zope.interface import providedBy
 
 from Products.CMFPlone.PloneBaseTool import PloneBaseTool
@@ -142,7 +143,7 @@ def allowedRolesAndUsers(obj):
             localroles = acl_users._getAllLocalRoles(obj)
     except AttributeError:
         localroles = _mergedLocalRoles(obj)
-    for user, roles in localroles.items():
+    for user, roles in list(localroles.items()):
         for role in roles:
             if role in allowed:
                 allowed['user:' + user] = 1
@@ -172,7 +173,7 @@ def sortable_title(obj):
         if safe_callable(title):
             title = title()
 
-        if isinstance(title, basestring):
+        if isinstance(title, str):
             # Ignore case, normalize accents, strip spaces
             sortabletitle = mapUnicode(safe_unicode(title)).lower().strip()
             # Replace numbers with zero filled numbers
@@ -182,7 +183,7 @@ def sortable_title(obj):
                 start = sortabletitle[:(MAX_SORTABLE_TITLE - 13)]
                 end = sortabletitle[-10:]
                 sortabletitle = start + '...' + end
-            return sortabletitle.encode('utf-8')
+            return sortabletitle
     return ''
 
 
@@ -221,7 +222,7 @@ def getObjSize(obj):
     if not size:
         return '0 %s' % smaller
 
-    if isinstance(size, (int, long)):
+    if isinstance(size, int):
         if size < SIZE_CONST[smaller]:
             return '1 %s' % smaller
         for c in SIZE_ORDER:
@@ -272,10 +273,10 @@ def location(obj):
 
 
 
+@implementer(IPloneCatalogTool)
 class CatalogTool(PloneBaseTool, BaseTool):
     """Plone's catalog tool"""
 
-    implements(IPloneCatalogTool)
 
     meta_type = 'Plone Catalog Tool'
     security = ClassSecurityInfo()
@@ -344,6 +345,8 @@ class CatalogTool(PloneBaseTool, BaseTool):
             wrapper = queryMultiAdapter((object, self), IIndexableObject)
             if wrapper is not None:
                 w = wrapper
+            else:
+                w = IndexableObjectWrapper(object, self)
 
         ZCatalog.catalog_object(self, w, uid, idxs,
                                 update_metadata, pghandler=pghandler)
@@ -453,7 +456,7 @@ class CatalogTool(PloneBaseTool, BaseTool):
         if RESPONSE is not None:
             RESPONSE.redirect(
               URL1 + '/manage_catalogAdvanced?manage_tabs_message=' +
-              urllib.quote('Catalog Rebuilt\n'
+              urllib.parse.quote('Catalog Rebuilt\n'
                            'Total time: %s\n'
                            'Total CPU time: %s'
                                 % (repr(elapse), repr(c_elapse))))

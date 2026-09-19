@@ -1,6 +1,6 @@
 from Products.CMFPlone.tests import PloneTestCase
 from zExceptions import Forbidden
-from cStringIO import StringIO
+from io import StringIO
 
 from DateTime import DateTime
 
@@ -83,7 +83,7 @@ class TestAccessControlPanelScripts(PloneTestCase.FunctionalTestCase):
                                 (self.portal_path, default_user),
                                 self.basic_auth)
 
-        self.assertEquals(response.getStatus(), 200)
+        self.assertEqual(response.getStatus(), 200)
 
     def testUserPreferences(self):
         '''Test access to user details.'''
@@ -92,4 +92,4 @@ class TestAccessControlPanelScripts(PloneTestCase.FunctionalTestCase):
                                 (self.portal_path, default_user),
                                 self.basic_auth)
 
-        self.assertEquals(response.getStatus(), 200)
+        self.assertEqual(response.getStatus(), 200)

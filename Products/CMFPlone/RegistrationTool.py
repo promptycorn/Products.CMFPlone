@@ -15,12 +15,12 @@ from Products.CMFDefault.RegistrationTool import RegistrationTool as BaseTool
 
 from Products.CMFCore.permissions import AddPortalMember
 
-from App.class_init import InitializeClass
+from AccessControl.class_init import InitializeClass
 from AccessControl import ClassSecurityInfo, Unauthorized
 from AccessControl import getSecurityManager
 from AccessControl.SecurityManagement import newSecurityManager
 from AccessControl.SecurityManagement import setSecurityManager
-from AccessControl.User import nobody
+from AccessControl.users import nobody
 from Products.CMFPlone.PloneBaseTool import PloneBaseTool
 from Products.CMFPlone.PloneTool import EMAIL_RE
 from Products.CMFDefault.utils import checkEmailAddress
@@ -81,9 +81,9 @@ def get_member_by_login_name(context, login_name, raise_exceptions=True):
     elif len(userids) > 1:
         if raise_exceptions:
             raise ValueError(
-                _(u'Multiple users found with the same login name.'))
+                _('Multiple users found with the same login name.'))
     if member is None and raise_exceptions:
-        raise ValueError(_(u'The username you entered could not be found.'))
+        raise ValueError(_('The username you entered could not be found.'))
     return member
 
 # seed the random number generator
@@ -111,7 +111,10 @@ class RegistrationTool(PloneBaseTool, BaseTool):
 
     def _md5base(self):
         if self._v_md5base is None:
-            self._v_md5base = md5(self.md5key)
+            key = self.md5key
+            if isinstance(key, str):
+                key = key.encode('utf-8')
+            self._v_md5base = md5(key)
         return self._v_md5base
 
     # Get a password of the prescribed length
@@ -132,13 +135,18 @@ class RegistrationTool(PloneBaseTool, BaseTool):
             return password
         else:
             m = self._md5base().copy()
+            if isinstance(s, str):
+                s = s.encode('utf-8')
             m.update(s)
             d = m.digest()  # compute md5(md5key + s)
             assert(len(d) >= length)
             password = ''
             nchars = len(password_chars)
             for i in range(0, length):
-                password += password_chars[ord(d[i]) % nchars]
+                char = d[i]
+                if not isinstance(char, int):
+                    char = ord(char)
+                password += password_chars[char % nchars]
             return password
 
     security.declarePublic('isValidEmail')
@@ -167,8 +175,8 @@ class RegistrationTool(PloneBaseTool, BaseTool):
             return err
 
         if confirm is not None and confirm != password:
-            return _(u'Your password and confirmation did not match. '
-                     u'Please try again.')
+            return _('Your password and confirmation did not match. '
+                     'Please try again.')
 
         return None
 
@@ -181,7 +189,7 @@ class RegistrationTool(PloneBaseTool, BaseTool):
         if not validators:
             return None
 
-        err = u""
+        err = ""
         for validator_id, validator in validators:
             user = None
             set_id = ''
@@ -194,7 +202,7 @@ class RegistrationTool(PloneBaseTool, BaseTool):
                 if not err:
                     err = error
                 else:
-                    msgid = _(u'${sentances}. ${sentance}',
+                    msgid = _('${sentances}. ${sentance}',
                             mapping={'sentances': err, 'sentance':error})
                     err = self.translate(msgid)
         if not err:
@@ -216,20 +224,20 @@ class RegistrationTool(PloneBaseTool, BaseTool):
 
             username = props.get('username', '')
             if not username:
-                return _(u'You must enter a valid name.')
+                return _('You must enter a valid name.')
 
             if not self.isMemberIdAllowed(username):
-                return _(u'The login name you selected is already in use or '
-                         u'is not valid. Please choose another.')
+                return _('The login name you selected is already in use or '
+                         'is not valid. Please choose another.')
 
             email = props.get('email')
             if email is None:
-                return _(u'You must enter an email address.')
+                return _('You must enter an email address.')
 
             try:
                 checkEmailAddress(email)
             except EmailAddressInvalid:
-                return _(u'You must enter a valid email address.')
+                return _('You must enter a valid email address.')
 
         else:  # Existing member.
             if not hasattr(member, 'canWriteProperty') or \
@@ -242,13 +250,13 @@ class RegistrationTool(PloneBaseTool, BaseTool):
                     try:
                         checkEmailAddress(email)
                     except EmailAddressInvalid:
-                        return _(u'You must enter a valid email address.')
+                        return _('You must enter a valid email address.')
 
                 # Not allowed to clear an existing non-empty email.
                 existing = member.getProperty('email')
 
                 if existing and email == '':
-                    return _(u'You must enter a valid email address.')
+                    return _('You must enter a valid email address.')
 
         return None
 
@@ -308,14 +316,14 @@ class RegistrationTool(PloneBaseTool, BaseTool):
         membership = getToolByName(self, 'portal_membership')
         if not membership.checkPermission('Mail forgotten password', self):
             raise Unauthorized(
-                _(u"Mailing forgotten passwords has been disabled."))
+                _("Mailing forgotten passwords has been disabled."))
 
         utils = getToolByName(self, 'plone_utils')
         member = get_member_by_login_name(self, login, raise_exceptions=False)
 
         if member is None:
             raise ValueError(
-                _(u'The username you entered could not be found.'))
+                _('The username you entered could not be found.'))
 
         # Make sure the user is allowed to set the password.
         portal = getToolByName(self, 'portal_url').getPortalObject()
@@ -327,7 +335,7 @@ class RegistrationTool(PloneBaseTool, BaseTool):
             tmp_sm = getSecurityManager()
             if not tmp_sm.checkPermission(SetOwnPassword, portal):
                 raise Unauthorized(
-                    _(u"Mailing forgotten passwords has been disabled."))
+                    _("Mailing forgotten passwords has been disabled."))
         finally:
             setSecurityManager(orig_sm)
 
@@ -335,11 +343,11 @@ class RegistrationTool(PloneBaseTool, BaseTool):
         # the template will be made with a blank To:, this is bad
         email = member.getProperty('email')
         if not email:
-            raise ValueError(_(u'That user does not have an email address.'))
+            raise ValueError(_('That user does not have an email address.'))
         else:
             # add the single email address
             if not utils.validateSingleEmailAddress(email):
-                raise ValueError(_(u'The email address did not validate.'))
+                raise ValueError(_('The email address did not validate.'))
         check, msg = _checkEmail(email)
         if not check:
             raise ValueError(msg)
@@ -356,7 +364,7 @@ class RegistrationTool(PloneBaseTool, BaseTool):
             password=member.getPassword(), charset=encoding)
         # The mail headers are not properly encoded we need to extract
         # them and let MailHost manage the encoding.
-        if isinstance(mail_text, unicode):
+        if isinstance(mail_text, str):
             mail_text = mail_text.encode(encoding)
         message_obj = message_from_string(mail_text.strip())
         subject = message_obj['Subject']
@@ -371,7 +379,7 @@ class RegistrationTool(PloneBaseTool, BaseTool):
         except SMTPRecipientsRefused:
             # Don't disclose email address on failure
             raise SMTPRecipientsRefused(
-                _(u'Recipient address rejected by server.'))
+                _('Recipient address rejected by server.'))
         except SMTPException as e:
             raise(e)
         # return the rendered template "mail_password_response.pt"
@@ -389,13 +397,13 @@ class RegistrationTool(PloneBaseTool, BaseTool):
             # add the single email address
             if not utils.validateSingleEmailAddress(
                     member.getProperty('email')):
-                raise ValueError(_(u'The email address did not validate.'))
+                raise ValueError(_('The email address did not validate.'))
 
         email = member.getProperty('email')
         try:
             checkEmailAddress(email)
         except EmailAddressInvalid:
-            raise ValueError(_(u'The email address did not validate.'))
+            raise ValueError(_('The email address did not validate.'))
 
         pwrt = getToolByName(self, 'portal_password_reset')
         reset = pwrt.requestReset(new_member_id)
@@ -410,7 +418,7 @@ class RegistrationTool(PloneBaseTool, BaseTool):
 
         # The mail headers are not properly encoded we need to extract
         # them and let MailHost manage the encoding.
-        if isinstance(mail_text, unicode):
+        if isinstance(mail_text, str):
             mail_text = mail_text.encode(encoding)
         message_obj = message_from_string(mail_text.strip())
         subject = message_obj['Subject']

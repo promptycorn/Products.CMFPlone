@@ -1,5 +1,5 @@
 from AccessControl import ClassSecurityInfo
-from App.class_init import InitializeClass
+from AccessControl.class_init import InitializeClass
 from Products.CMFCore.permissions import ManagePortal
 from Products.CMFCore.utils import getToolByName
 from Products.CMFCore.utils import registerToolInterface
@@ -7,7 +7,7 @@ from Products.CMFPlone.PloneBaseTool import PloneBaseTool
 from Products.CMFQuickInstallerTool.QuickInstallerTool \
     import QuickInstallerTool as BaseTool
 from Products.CMFQuickInstallerTool.interfaces import IQuickInstallerTool
-import pkg_resources
+from packaging.version import parse as parse_version
 
 
 class QuickInstallerTool(PloneBaseTool, BaseTool):
@@ -74,7 +74,7 @@ class QuickInstallerTool(PloneBaseTool, BaseTool):
             if available:  # could return empty sequence
                 latest = available[-1]
                 profile_version = max(latest['dest'],
-                        key=pkg_resources.parse_version)
+                        key=parse_version)
         except Exception:
             pass
 

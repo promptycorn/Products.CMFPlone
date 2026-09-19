@@ -1,5 +1,5 @@
 from plone.memoize import view
-from App.class_init import InitializeClass
+from AccessControl.class_init import InitializeClass
 from zExceptions import NotFound
 from Acquisition import aq_base
 from Acquisition import aq_inner
@@ -24,7 +24,7 @@ from Products.CMFCore.permissions import AccessContentsInformation, \
                     ModifyPortalContent
 from Products.CMFDefault.DublinCore import DefaultDublinCoreImpl
 
-from zope.interface import implements
+from zope.interface import implementer
 
 
 class ReplaceableWrapper:
@@ -90,6 +90,7 @@ class OrderedContainer(Folder, OrderSupport):
 InitializeClass(OrderedContainer)
 
 
+@implementer(IWriteLock)
 class BasePloneFolder(CatalogAware, WorkflowAware, OpaqueItemManager,
                       PortalFolderBase, DefaultDublinCoreImpl):
     """Implements basic Plone folder functionality except ordering support.
@@ -97,7 +98,6 @@ class BasePloneFolder(CatalogAware, WorkflowAware, OpaqueItemManager,
 
     security = ClassSecurityInfo()
 
-    implements(IWriteLock)
 
     manage_options = Folder.manage_options + \
                      WorkflowAware.manage_options
@@ -173,7 +173,7 @@ class BasePloneFolder(CatalogAware, WorkflowAware, OpaqueItemManager,
         if ids is None:
             ids = []
         mt = getToolByName(self, 'portal_membership')
-        if isinstance(ids, basestring):
+        if isinstance(ids, str):
             ids = [ids]
         for id in ids:
             item = self._getOb(id)
@@ -192,9 +192,7 @@ class BasePloneFolder(CatalogAware, WorkflowAware, OpaqueItemManager,
         # Able to sort on field.
         values = PortalFolderBase.contentValues(self, filter=filter)
         if sort_on is not None:
-            values.sort(lambda x, y,
-                        sort_on=sort_on: safe_cmp(getattr(x, sort_on),
-                                                  getattr(y, sort_on)))
+            values.sort(key=lambda item: getattr(item, sort_on))
         if reverse:
             values.reverse()
 
@@ -256,7 +254,7 @@ def safe_cmp(x, y):
         x = x()
     if callable(y):
         y = y()
-    return cmp(x, y)
+    return (x > y) - (x < y)
 
 
 def addPloneFolder(self, id, title='', description='', REQUEST=None):

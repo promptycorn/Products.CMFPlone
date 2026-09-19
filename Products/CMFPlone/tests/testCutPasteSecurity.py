@@ -1,4 +1,4 @@
-from urllib2 import HTTPError
+from urllib.error import HTTPError
 
 from Products.CMFPlone.tests import PloneTestCase
 
@@ -167,7 +167,7 @@ class CutPasteFailureTests(PloneTestCase.FunctionalTestCase):
             browser.open(self.folder['destination-folder'].absolute_url())
             try:
                 browser.getLink('Paste').click()
-            except HTTPError, msg:
+            except HTTPError as msg:
                 # a HTTP 500 Server error is currently expected, unless we find a better way
                 # to abort the transaction.
                 pass
@@ -190,7 +190,7 @@ class CutPasteFailureTests(PloneTestCase.FunctionalTestCase):
             browser.open(self.folder['destination-folder'].absolute_url() + '/folder_contents')
             try:
                 browser.getControl(name='folder_paste:method').click()
-            except HTTPError, msg:
+            except HTTPError as msg:
                 # a HTTP 500 Server error is currently expected, unless we find a better way
                 # to abort the transaction.
                 pass

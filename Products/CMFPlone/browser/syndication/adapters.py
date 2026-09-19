@@ -1,6 +1,6 @@
 from zope.component.hooks import getSite
 from zope.component import adapts
-from zope.interface import implements
+from zope.interface import implementer
 from zope.interface import Interface
 from zope.component import queryMultiAdapter
 
@@ -104,8 +104,8 @@ class BaseFeedData(object):
         return 'No Publisher'
 
 
+@implementer(IFeed)
 class FolderFeed(BaseFeedData):
-    implements(IFeed)
 
     @lazy_property
     def author(self):
@@ -171,8 +171,8 @@ class CollectionFeed(FolderFeed):
         return self.context.queryCatalog(batch=False)[:self.limit]
 
 
+@implementer(ISearchFeed)
 class SearchFeed(FolderFeed):
-    implements(ISearchFeed)
 
     def _brains(self):
         max_items = self.limit
@@ -186,8 +186,8 @@ class SearchFeed(FolderFeed):
             use_navigation_root=True)[start:end]
 
 
+@implementer(IFeedItem)
 class BaseItem(BaseFeedData):
-    implements(IFeedItem)
     adapts(IItem, IFeed)
 
     def __init__(self, context, feed):
@@ -226,7 +226,7 @@ class BaseItem(BaseFeedData):
             value = self.context.text
         else:
             value = self.description
-        if not isinstance(value, basestring):
+        if not isinstance(value, str):
             if hasattr(value, 'output'):
                 # could be RichTextValue object, needs transform
                 value = value.output

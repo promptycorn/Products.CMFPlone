@@ -25,6 +25,18 @@ if js_enabled and not cookies_enabled:
 
 mt=context.portal_membership
 if mt.isAnonymousUser():
+    pas = getToolByName(context, 'acl_users')
+    login = request.get('__ac_name', '') or request.get('login_name', '')
+    password = request.get('__ac_password', '') or request.get('login_password', '')
+    source_users = getattr(pas, 'source_users', None)
+    if login and password and source_users is not None:
+        authenticated = source_users.authenticateCredentials({
+            'login': login,
+            'password': password,
+        })
+        if authenticated and authenticated[0]:
+            return state
+
     props = getToolByName(context, 'portal_properties').site_properties
     email_login = props.getProperty('use_email_as_login')
     if js_enabled:  # javascript is enabled - we can diagnose the failure

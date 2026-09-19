@@ -24,7 +24,7 @@ if REQUEST is None:
 
 # See http://dev.plone.org/plone/ticket/9422 for
 # an explanation of '\u3000'
-multispace = u'\u3000'.encode('utf-8')
+multispace = '\u3000'
 
 
 def quotestring(s):
@@ -81,7 +81,7 @@ def rootAtNavigationRoot(query):
         query['path'] = getNavigationRoot(context)
 
 # Avoid creating a session implicitly.
-for k in REQUEST.keys():
+for k in list(REQUEST.keys()):
     if k in ('SESSION',):
         continue
     v = REQUEST.get(k)
@@ -104,7 +104,7 @@ for k in REQUEST.keys():
         else:
             query[k] = v
 
-for k, v in second_pass.items():
+for k, v in list(second_pass.items()):
     qs = query.get(k)
     if qs is None:
         continue

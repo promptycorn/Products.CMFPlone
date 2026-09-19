@@ -14,7 +14,6 @@
     <meta:provides feature="plone-41" />
     <meta:provides feature="plone-42" />
     <meta:provides feature="plone-43" />
-
     <!-- Exclude directives need to be executed before the ZCML file would
          be loaded. Doing this during the meta.zcml phase ensures this.
          The functionality in the following packages is not used and might
@@ -46,4 +45,3 @@
         />
 
 </configure>
-

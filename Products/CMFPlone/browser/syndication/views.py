@@ -29,7 +29,7 @@ class FeedView(BrowserView):
         util = getMultiAdapter((self.context, self.request),
                                name='syndication-util')
         context_state = getMultiAdapter((self.context, self.request),
-                                        name=u'plone_context_state')
+                                        name='plone_context_state')
         if context_state.is_portal_root() or util.context_enabled(raise404=True):
             settings = IFeedSettings(self.context)
             if self.__name__ not in settings.feed_types:
@@ -113,15 +113,15 @@ class NewsMLFeedView(FeedView):
 
 
 class SettingsForm(form.EditForm):
-    label = _(u'heading_syndication_properties',
-              default=u'Syndication Properties')
+    label = _('heading_syndication_properties',
+              default='Syndication Properties')
     description = _(
-        u'description_syndication_properties',
-        default=u'Syndication enables you to syndicate this folder so it can'
-                u'be synchronized from other web sites.')
+        'description_syndication_properties',
+        default='Syndication enables you to syndicate this folder so it can'
+                'be synchronized from other web sites.')
     fields = field.Fields(IFeedSettings)
 
-    @button.buttonAndHandler(_(u'Save'), name='save')
+    @button.buttonAndHandler(_('Save'), name='save')
     def handleSave(self, action):
         data, errors = self.extractData()
         if errors:

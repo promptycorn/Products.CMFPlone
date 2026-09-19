@@ -2,7 +2,8 @@
     tal:define="portal_state context/@@plone_portal_state;
                 lang context/Language|nothing;
                 lang python: lang or portal_state.default_language();
-                setHeader python:request.RESPONSE.setHeader;">
+                plone_request context/REQUEST;
+                setHeader python:plone_request.RESPONSE.setHeader;">
     <metal:block tal:define="dummy python:setHeader('Content-Type', 'text/html;;charset=utf-8')" />
     <metal:block tal:define="dummy python:setHeader('Content-Language', lang)" />
     <metal:block tal:define="dummy python:setHeader('Expires', 'Sat, 1 Jan 2000 00:00:00 GMT')" />

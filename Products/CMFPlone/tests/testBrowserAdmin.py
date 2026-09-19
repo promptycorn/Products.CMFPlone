@@ -1,4 +1,4 @@
-import urlparse
+import urllib.parse
 import os
 from Products.CMFPlone.tests import PloneTestCase
 

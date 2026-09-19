@@ -4,5 +4,7 @@ except ImportError:
     pass
 
 from Products.CMFCore.RegistrationTool import RegistrationTool
-if hasattr(RegistrationTool.addMember.im_func, '__doc__'):
-    del RegistrationTool.addMember.im_func.__doc__
+addMember = getattr(RegistrationTool.addMember, '__func__',
+                    RegistrationTool.addMember)
+if hasattr(addMember, '__doc__'):
+    del addMember.__doc__

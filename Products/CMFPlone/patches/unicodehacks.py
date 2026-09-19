@@ -1,17 +1,19 @@
 def _unicode_replace(structure):
-    if isinstance(structure, str):
+    if isinstance(structure, bytes):
         text = structure.decode('utf-8', 'replace')
+    elif isinstance(structure, str):
+        text = structure
     else:
-        text = unicode(structure)
+        text = str(structure)
     return text
 
 
 def _nulljoin(valuelist):
     try:
-        return u''.join(valuelist)
+        return ''.join(valuelist)
     except UnicodeDecodeError:
         pass
-    return u''.join([_unicode_replace(value) for value in valuelist])
+    return ''.join([_unicode_replace(value) for value in valuelist])
 
 
 def new__call__(self, econtext):
@@ -35,6 +37,6 @@ class FasterStringIO(list):
 
     def getvalue(self):
         try:
-            return u''.join(self)
+            return ''.join(self)
         except UnicodeDecodeError:
-            return u''.join([_unicode_replace(value) for value in self])
+            return ''.join([_unicode_replace(value) for value in self])

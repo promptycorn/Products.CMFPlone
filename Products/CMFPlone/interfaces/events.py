@@ -1,4 +1,7 @@
-from zope.component.interfaces import IObjectEvent
+try:
+    from zope.component.interfaces import IObjectEvent
+except ImportError:
+    from zope.interface.interfaces import IObjectEvent
 
 
 class ISiteManagerCreatedEvent(IObjectEvent):

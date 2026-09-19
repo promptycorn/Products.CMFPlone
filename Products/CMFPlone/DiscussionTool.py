@@ -1,6 +1,6 @@
 from Products.CMFDefault.DiscussionTool import DiscussionTool as BaseTool
 from AccessControl import ClassSecurityInfo
-from App.class_init import InitializeClass
+from AccessControl.class_init import InitializeClass
 from Products.CMFPlone.PloneBaseTool import PloneBaseTool
 from Products.CMFDefault.permissions import ReplyToItem
 

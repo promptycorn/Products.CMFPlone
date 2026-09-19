@@ -57,7 +57,7 @@ class TestCheckId(PloneTestCase.PloneTestCase):
 
     def testRequiredId(self):
         r = self.folder.check_id('', required=1)
-        self.assertEqual(r, u'Please enter a name.')
+        self.assertEqual(r, 'Please enter a name.')
 
     def testAlternativeId(self):
         r = self.folder.check_id('', alternative_id='foo')
@@ -65,13 +65,13 @@ class TestCheckId(PloneTestCase.PloneTestCase):
 
     def testBadId(self):
         r = self.folder.check_id('=')
-        self.assertEqual(r, u'= is not a legal name. The following characters '
-                            u'are invalid: =')
+        self.assertEqual(r, '= is not a legal name. The following characters '
+                            'are invalid: =')
 
     def testDecodeId(self):
         r = self.folder.check_id('\xc3\xa4')
-        self.assertEqual(r, u'\xe4 is not a legal name. The following '
-                            u'characters are invalid: \xe4')
+        self.assertEqual(r, '\xe4 is not a legal name. The following '
+                            'characters are invalid: \xe4')
 
     def testCatalogIndex(self):
         # TODO: Tripwire
@@ -82,7 +82,7 @@ class TestCheckId(PloneTestCase.PloneTestCase):
                         'Expected permission "Search ZCatalog"')
 
         r = self.folder.check_id('created')
-        self.assertEqual(r, u'created is reserved.')
+        self.assertEqual(r, 'created is reserved.')
 
     def testCatalogMetadata(self):
         portal_catalog = getToolByName(self.portal, 'portal_catalog')
@@ -90,31 +90,31 @@ class TestCheckId(PloneTestCase.PloneTestCase):
         self.assertTrue('new_metadata' in portal_catalog.schema())
         self.assertFalse('new_metadata' in portal_catalog.indexes())
         r = self.folder.check_id('new_metadata')
-        self.assertEqual(r, u'new_metadata is reserved.')
+        self.assertEqual(r, 'new_metadata is reserved.')
 
     def testCollision(self):
         self.folder.invokeFactory('Document', id='foo')
         self.folder.invokeFactory('Document', id='bar')
         r = self.folder.foo.check_id('bar')
-        self.assertEqual(r, u'There is already an item named bar in this '
-                            u'folder.')
+        self.assertEqual(r, 'There is already an item named bar in this '
+                            'folder.')
 
     def testTempObjectCollision(self):
         foo = self.folder.restrictedTraverse('portal_factory/Document/foo')
         self.folder._setObject('bar', dummy.Item('bar'))
         r = foo.check_id('bar')
-        self.assertEqual(r, u'bar is reserved.')
+        self.assertEqual(r, 'bar is reserved.')
 
     def testReservedId(self):
         self.folder._setObject('foo', dummy.Item('foo'))
         r = self.folder.foo.check_id('portal_catalog')
-        self.assertEqual(r, u'portal_catalog is reserved.')
+        self.assertEqual(r, 'portal_catalog is reserved.')
 
     def testHiddenObjectId(self):
         # If a parallel object is not in content-space, should get 'reserved'
         # instead of 'taken'
         r = self.folder.check_id('portal_skins')
-        self.assertEqual(r, u'portal_skins is reserved.')
+        self.assertEqual(r, 'portal_skins is reserved.')
 
     def testCanOverrideParentNames(self):
         self.folder.invokeFactory('Document', id='item1')
@@ -126,14 +126,14 @@ class TestCheckId(PloneTestCase.PloneTestCase):
     def testInvalidId(self):
         self.folder._setObject('foo', dummy.Item('foo'))
         r = self.folder.foo.check_id('_foo')
-        self.assertEqual(r, u'_foo is reserved.')
+        self.assertEqual(r, '_foo is reserved.')
 
     def testContainerHook(self):
         # Container may have a checkValidId method; make sure it is called
         self.folder._setObject('checkValidId', dummy.Raiser(dummy.Error))
         self.folder._setObject('foo', dummy.Item('foo'))
         r = self.folder.foo.check_id('whatever')
-        self.assertEqual(r, u'whatever is reserved.')
+        self.assertEqual(r, 'whatever is reserved.')
 
     def testContainerHookRaisesUnauthorized(self):
         # check_id should not swallow Unauthorized errors raised by hook
@@ -173,7 +173,7 @@ class TestCheckId(PloneTestCase.PloneTestCase):
 
         r = self.folder.check_id('created')
         # But now the final hasattr check picks this up
-        self.assertEqual(r, u'created is reserved.')
+        self.assertEqual(r, 'created is reserved.')
 
     def testCollisionSkipped(self):
         # Note that check is skipped when we don't have
@@ -194,7 +194,7 @@ class TestCheckId(PloneTestCase.PloneTestCase):
 
         self.folder._setObject('foo', dummy.Item('foo'))
         r = self.folder.foo.check_id('portal_catalog')
-        self.assertEqual(r, u'portal_catalog is reserved.')
+        self.assertEqual(r, 'portal_catalog is reserved.')
 
     def testInvalidIdSkipped(self):
         # Note that the check is skipped when we don't have
@@ -212,9 +212,9 @@ class TestCheckId(PloneTestCase.PloneTestCase):
                                       acquire=0)
 
         self.folder._setObject('foo', dummy.Item('foo'))
-        for alias in self.folder.getTypeInfo().getMethodAliases().keys():
+        for alias in list(self.folder.getTypeInfo().getMethodAliases().keys()):
             r = self.folder.foo.check_id(alias)
-            self.assertEqual(r, u'%s is reserved.' % alias)
+            self.assertEqual(r, '%s is reserved.' % alias)
 
     def testCheckingMethodAliasesOnPortalRoot(self):
         # Test for bug http://dev.plone.org/plone/ticket/4351
@@ -226,7 +226,7 @@ class TestCheckId(PloneTestCase.PloneTestCase):
         # not defined on the portal root.
         try:
             self.portal.check_id('foo')
-        except AttributeError, e:
+        except AttributeError as e:
             self.fail(e)
 
     def testProxyRoles(self):

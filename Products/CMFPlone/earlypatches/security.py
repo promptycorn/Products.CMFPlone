@@ -16,24 +16,26 @@ namespace.view.traverse = traverse
 from AccessControl import getSecurityManager
 from zExceptions import Unauthorized
 from OFS.ObjectManager import ObjectManager
-ObjectManager.__old_manage_FTPlist = ObjectManager.manage_FTPlist
-def manage_FTPlist(self, REQUEST):
-    """Returns a directory listing consisting of a tuple of
-    (id,stat) tuples, marshaled to a string. Note, the listing it
-    should include '..' if there is a Folder above the current
-    one.
+if hasattr(ObjectManager, 'manage_FTPlist'):
+    ObjectManager.__old_manage_FTPlist = ObjectManager.manage_FTPlist
+    def manage_FTPlist(self, REQUEST):
+        """Returns a directory listing consisting of a tuple of
+        (id,stat) tuples, marshaled to a string. Note, the listing it
+        should include '..' if there is a Folder above the current
+        one.
 
-    In the case of non-foldoid objects it should return a single
-    tuple (id,stat) representing itself."""
+        In the case of non-foldoid objects it should return a single
+        tuple (id,stat) representing itself."""
 
-    if not getSecurityManager().checkPermission('Access contents information', self):
-        raise Unauthorized('Not allowed to access contents.')
+        if not getSecurityManager().checkPermission(
+                'Access contents information', self):
+            raise Unauthorized('Not allowed to access contents.')
 
-    return self.__old_manage_FTPlist(REQUEST)
-ObjectManager.manage_FTPlist = manage_FTPlist
+        return self.__old_manage_FTPlist(REQUEST)
+    ObjectManager.manage_FTPlist = manage_FTPlist
 
 # 4. Make sure z3c.form widgets don't get declared as public
-from Products.Five.metaconfigure import ClassDirective
+from AccessControl.metaconfigure import ClassDirective
 old_require = ClassDirective.require
 def require(self, *args, **kw):
     if self._ClassDirective__class.__module__.startswith('z3c.form.browser'):
@@ -68,14 +70,14 @@ def check_getToolByName(obj, name, default=_marker):
     return result
 """
 from Products.CMFCore import utils
-if '_marker' not in utils.getToolByName.func_globals:
+if '_marker' not in utils.getToolByName.__globals__:
     raise Exception("This Version of Products.CMFPlone is not compatible "
                     "with Products.PloneHotfix20121106, the fixes are "
                     "included already in Products.CMFPlone, please remove "
                     "the hotfix")
-exec code in utils.getToolByName.func_globals
-utils._getToolByName.func_code = utils.getToolByName.func_code
-utils.getToolByName.func_code = utils.check_getToolByName.func_code
+exec(code, utils.getToolByName.__globals__)
+utils._getToolByName.__code__ = utils.getToolByName.__code__
+utils.getToolByName.__code__ = utils.check_getToolByName.__code__
 
 # 6. Protect some methods in ZCatalog
 from Products.ZCatalog.ZCatalog import ZCatalog

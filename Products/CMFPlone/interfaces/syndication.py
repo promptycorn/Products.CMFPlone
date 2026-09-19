@@ -150,44 +150,44 @@ class IFeedItem(IFeedData):
 class ISiteSyndicationSettings(Interface):
 
     allowed = schema.Bool(
-        title=_(u'Allowed'),
-        description=_(u'Allow syndication for collections and folders '
-                      u'on site.'),
+        title=_('Allowed'),
+        description=_('Allow syndication for collections and folders '
+                      'on site.'),
         default=True)
 
     default_enabled = schema.Bool(
-        title=_(u'Enabled by default'),
-        description=_(u'If syndication should be enabled by default for all '
-                      u'folders and collections.'),
+        title=_('Enabled by default'),
+        description=_('If syndication should be enabled by default for all '
+                      'folders and collections.'),
         default=False)
 
     search_rss_enabled = schema.Bool(
-        title=_(u'Search RSS enabled'),
-        description=_(u'Allows users to subscribe to feeds of search results'),
+        title=_('Search RSS enabled'),
+        description=_('Allows users to subscribe to feeds of search results'),
         default=True)
 
     show_author_info = schema.Bool(
-        title=_(u'Show author info'),
-        description=_(u'Should feeds include author information'),
+        title=_('Show author info'),
+        description=_('Should feeds include author information'),
         default=True)
 
     render_body = schema.Bool(
-        title=_(u'Render Body'),
-        description=_(u'help_render_body',
-                      default=u'If body text available for item, '
-                      u'render it, otherwise use description.'),
+        title=_('Render Body'),
+        description=_('help_render_body',
+                      default='If body text available for item, '
+                      'render it, otherwise use description.'),
         default=False)
 
     max_items = schema.Int(
-        title=_(u'label_syndication_max_items',
-                default=u'Maximum Items'),
-        description=_(u'help_syndication_max_items',
-                      default=u'Maximum number of items that will be syndicated.'),
+        title=_('label_syndication_max_items',
+                default='Maximum Items'),
+        description=_('help_syndication_max_items',
+                      default='Maximum number of items that will be syndicated.'),
         default=15)
 
     allowed_feed_types = schema.Tuple(
-        title=_(u'Allowed Feed Types'),
-        description=_(u"Separate view name and title by '|'"),
+        title=_('Allowed Feed Types'),
+        description=_("Separate view name and title by '|'"),
         required=True,
         missing_value=None,
         default=(
@@ -199,9 +199,9 @@ class ISiteSyndicationSettings(Interface):
     )
 
     site_rss_items = schema.Tuple(
-        title=_(u'Site RSS'),
-        description=_(u'Paths to folders and collections to link to '
-                      u'at the portal root.'),
+        title=_('Site RSS'),
+        description=_('Paths to folders and collections to link to '
+                      'at the portal root.'),
         required=False,
         default=('/news/aggregator',),
         value_type=schema.Choice(
@@ -209,24 +209,24 @@ class ISiteSyndicationSettings(Interface):
     )
 
     show_syndication_button = schema.Bool(
-        title=_(u"Show Settings Button"),
-        description=_(u"Makes it possible to customize syndication settings "
-                      u"for particular folders and collections "))
+        title=_("Show Settings Button"),
+        description=_("Makes it possible to customize syndication settings "
+                      "for particular folders and collections "))
 
     show_syndication_link = schema.Bool(
-        title=_(u"Show Feed Link"),
-        description=_(u"Enable RSS link document action on the syndication "
-                      u"content item."))
+        title=_("Show Feed Link"),
+        description=_("Enable RSS link document action on the syndication "
+                      "content item."))
 
 
 class IFeedSettings(Interface):
 
     enabled = schema.Bool(
-        title=_(u'Enabled'),
+        title=_('Enabled'),
         default=False)
 
     feed_types = schema.Tuple(
-        title=_(u'Feed Types'),
+        title=_('Feed Types'),
         required=True,
         missing_value=None,
         default=("RSS", "rss.xml", "atom.xml"),
@@ -235,17 +235,17 @@ class IFeedSettings(Interface):
         ))
 
     render_body = schema.Bool(
-        title=_(u'Render Body'),
-        description=_(u'help_render_body',
-                      default=u'If body text available for item, '
-                      u'render it, otherwise use description.'),
+        title=_('Render Body'),
+        description=_('help_render_body',
+                      default='If body text available for item, '
+                      'render it, otherwise use description.'),
         default=False)
 
     max_items = schema.Int(
-        title=_(u'label_syndication_max_items',
-                default=u'Maximum Items'),
-        description=_(u'help_syndication_max_items',
-                      default=u'Maximum number of items that will be syndicated.'),
+        title=_('label_syndication_max_items',
+                default='Maximum Items'),
+        description=_('help_syndication_max_items',
+                      default='Maximum number of items that will be syndicated.'),
         default=15)
 
 

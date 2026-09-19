@@ -12,15 +12,17 @@ from AccessControl import ClassSecurityInfo
 from AccessControl import Permissions
 from AccessControl import Unauthorized
 from Acquisition import aq_base
-from App.class_init import InitializeClass
+from AccessControl.class_init import InitializeClass
 from ComputedAttribute import ComputedAttribute
 from webdav.NullResource import NullResource
 from Products.CMFPlone.PloneFolder import ReplaceableWrapper
+from Products.CMFCore.interfaces import IFolderish
+from Products.CMFCore.interfaces import ISiteRoot
 from Products.CMFPlone.interfaces import IPloneSiteRoot
 from Products.CMFPlone.interfaces.syndication import ISyndicatable
 
 from plone.i18n.locales.interfaces import IMetadataLanguageAvailability
-from zope.interface import implements
+from zope.interface import implementer
 from zope.component import queryUtility
 
 member_indexhtml = """\
@@ -29,13 +31,13 @@ return member_search()
 """
 
 
+@implementer(IPloneSiteRoot, ISiteRoot, IFolderish, ISyndicatable)
 class PloneSite(CMFSite, OrderedContainer, BrowserDefaultMixin, UniqueObject):
     """Make PloneSite subclass CMFSite and add some methods."""
 
     security = ClassSecurityInfo()
     meta_type = portal_type = 'Plone Site'
 
-    implements(IPloneSiteRoot, ISyndicatable)
 
     manage_options = (
         CMFSite.manage_options[:2] +
@@ -104,7 +106,7 @@ class PloneSite(CMFSite, OrderedContainer, BrowserDefaultMixin, UniqueObject):
         """We need to enforce security."""
         if ids is None:
             ids = []
-        if isinstance(ids, basestring):
+        if isinstance(ids, str):
             ids = [ids]
         for id in ids:
             item = self._getOb(id)
@@ -136,9 +138,9 @@ class PloneSite(CMFSite, OrderedContainer, BrowserDefaultMixin, UniqueObject):
     def availableLanguages(self):
         util = queryUtility(IMetadataLanguageAvailability)
         languages = util.getLanguageListing()
-        languages.sort(lambda x, y: cmp(x[1], y[1]))
+        languages.sort(key=lambda item: item[1])
         # Put language neutral at the top.
-        languages.insert(0, (u'', _(u'Language neutral (site default)')))
+        languages.insert(0, ('', _('Language neutral (site default)')))
         return languages
 
     # Ensure portals don't get cataloged.

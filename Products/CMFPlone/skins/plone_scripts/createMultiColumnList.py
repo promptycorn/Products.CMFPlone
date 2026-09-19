@@ -37,8 +37,8 @@ elif sort_on == 'self':
 # Calculate the length of the sublists
 sublist_len = (
     list_len % numCols == 0 and
-    list_len / numCols or
-    list_len / numCols + 1)
+    list_len // numCols or
+    list_len // numCols + 1)
 
 # Calculate the list end point given the list number
 list_end = lambda list_num: (

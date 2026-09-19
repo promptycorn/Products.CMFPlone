@@ -1,6 +1,6 @@
 from operator import itemgetter
-from urlparse import urljoin
-from urlparse import urlparse
+from urllib.parse import urljoin
+from urllib.parse import urlparse
 
 from plone.i18n.locales.interfaces import IContentLanguageAvailability
 from plone.protect.interfaces import IDisableCSRFProtection
@@ -51,7 +51,7 @@ class Overview(BrowserView):
 
         result = []
         secman = getSecurityManager()
-        for obj in root.values():
+        for obj in list(root.values()):
             if obj.meta_type is 'Folder':
                 result = result + self.sites(obj)
             elif IPloneSiteRoot.providedBy(obj):
@@ -165,7 +165,7 @@ class AddPloneSite(BrowserView):
         for info in profile_registry.listProfileInfo():
             if info.get('type') == BASE and \
                info.get('for') in (IPloneSiteRoot, None) and \
-               info.get('id') != u'Products.kupu:default':
+               info.get('id') != 'Products.kupu:default':
                 base_profiles.append(info)
 
         return dict(
@@ -202,8 +202,8 @@ class AddPloneSite(BrowserView):
             available = util.getLanguages(combined=True)
         else:
             available = util.getLanguages()
-        languages = [(code, v.get(u'native', v.get(u'name'))) for
-                     code, v in available.items()]
+        languages = [(code, v.get('native', v.get('name'))) for
+                     code, v in list(available.items())]
         languages.sort(key=itemgetter(1))
         return languages
 

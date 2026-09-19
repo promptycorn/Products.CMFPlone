@@ -1,9 +1,14 @@
 # From Products.PloneHotfix20160419
 # Plus extras for properties.
 from OFS.PropertyManager import PropertyManager
-from OFS.ZDOM import Document
-from OFS.ZDOM import Node
 from Products.CMFPlone.Portal import PloneSite
+
+try:
+    from OFS.ZDOM import Document
+    from OFS.ZDOM import Node
+except ImportError:
+    Document = None
+    Node = None
 
 
 try:
@@ -37,6 +42,7 @@ klasses = (
     ATCTContent,
     ATCTBTreeFolder
 )
+klasses = tuple(klass for klass in klasses if klass is not None)
 methods = (
     'EffectiveDate',
     'ExpirationDate',
@@ -62,8 +68,8 @@ for klass in klasses:
     for method_name in methods:
         method = getattr(klass, method_name, None)
         if (method is not None and hasattr(method, 'im_func') and
-                hasattr(method.im_func, '__doc__')):
-            del method.im_func.__doc__
+                hasattr(method.__func__, '__doc__')):
+            del method.__func__.__doc__
 
 property_methods = (
     'getProperty',
@@ -80,5 +86,5 @@ property_methods = (
 for method_name in property_methods:
     method = getattr(PropertyManager, method_name, None)
     if (method is not None and hasattr(method, 'im_func') and
-            hasattr(method.im_func, '__doc__')):
-        del method.im_func.__doc__
+            hasattr(method.__func__, '__doc__')):
+        del method.__func__.__doc__

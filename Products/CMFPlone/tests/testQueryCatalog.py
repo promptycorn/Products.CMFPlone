@@ -28,7 +28,7 @@ class TestQueryCatalog(PloneTestCase.PloneTestCase):
         # strip portal_types and show_inactive parameter which is
         # auto-set with types blacklisting. Useful to simplify test
         # assertions when we don't care
-        if type(query_dict) == types.DictType:
+        if type(query_dict) == dict:
             for ignore in ['portal_type', 'show_inactive']:
                 if ignore in query_dict:
                     del query_dict[ignore]
@@ -106,12 +106,12 @@ class TestQueryCatalog(PloneTestCase.PloneTestCase):
         ntp = self.portal.portal_properties.navtree_properties
         ntp.root = '/'
         qry = self.folder.queryCatalog(request, use_navigation_root=True)
-        self.assertEquals('/'.join(self.portal.getPhysicalPath()), qry['path'])
+        self.assertEqual('/'.join(self.portal.getPhysicalPath()), qry['path'])
         self.setRoles(('Manager',))
         self.portal.invokeFactory('Folder', 'foo')
         ntp.root = '/foo'
         qry = self.folder.queryCatalog(request, use_navigation_root=True)
-        self.assertEquals('/'.join(self.portal.foo.getPhysicalPath()),
+        self.assertEqual('/'.join(self.portal.foo.getPhysicalPath()),
                           qry['path'])
 
     def testNavigationRootDoesNotOverrideExplicitPath(self):
@@ -121,7 +121,7 @@ class TestQueryCatalog(PloneTestCase.PloneTestCase):
         self.portal.invokeFactory('Folder', 'foo')
         ntp.root = '/foo'
         qry = self.folder.queryCatalog(request, use_navigation_root=True)
-        self.assertEquals('/yyy/zzz', qry['path'])
+        self.assertEqual('/yyy/zzz', qry['path'])
 
 
 class TestQueryCatalogQuoting(PloneTestCase.PloneTestCase):
@@ -141,7 +141,7 @@ class TestQueryCatalogQuoting(PloneTestCase.PloneTestCase):
         # strip portal_types and show_inactive parameter which is
         # auto-set with types blacklisting. Useful to simplify test
         # assertions when we don't care
-        if type(query_dict) == types.DictType:
+        if type(query_dict) == dict:
             for ignore in ['portal_type', 'show_inactive']:
                 if ignore in query_dict:
                     del query_dict[ignore]

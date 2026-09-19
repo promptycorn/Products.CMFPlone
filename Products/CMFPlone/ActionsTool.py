@@ -1,5 +1,5 @@
 from AccessControl import ClassSecurityInfo
-from App.class_init import InitializeClass
+from AccessControl.class_init import InitializeClass
 from Products.CMFCore.ActionInformation import ActionInfo
 from Products.CMFCore.ActionsTool import ActionsTool as BaseTool
 from Products.CMFCore.interfaces import IActionProvider
@@ -57,7 +57,7 @@ class ActionsTool(PloneBaseTool, BaseTool):
 
         if action_chain:
             filtered_actions = []
-            if isinstance(action_chain, basestring):
+            if isinstance(action_chain, str):
                 action_chain = (action_chain, )
             for action_ident in action_chain:
                 sep = action_ident.rfind('/')

@@ -54,15 +54,18 @@ def initialize(context):
     allow_class(ObjectDeleted)
     allow_class(WorkflowException)
 
-    from PloneBatch import Batch
+    from .PloneBatch import Batch
     allow_class(Batch)
 
     # Make Batch available at module level
     this_module.Batch = Batch
 
     ModuleSecurityInfo('StringIO').declarePublic('StringIO')
-    from StringIO import StringIO
-    allow_class(StringIO)
+    from io import StringIO
+    try:
+        allow_class(StringIO)
+    except TypeError:
+        pass
 
     # Make Unauthorized importable TTW
     ModuleSecurityInfo('AccessControl').declarePublic('Unauthorized')
@@ -119,21 +122,21 @@ def initialize(context):
     allow_type(str, rules)
 
     # Same for unicode instead of str.
-    rules = dict([(m, True) for m in dir(unicode) if not m.startswith('_')])
+    rules = dict([(m, True) for m in dir(str) if not m.startswith('_')])
     rules['format'] = safe_format
-    allow_type(unicode, rules)
+    allow_type(str, rules)
 
     # Apply monkey patches
-    import patches
+    from . import patches
 
     # Register unicode splitter w/ ZCTextIndex
     # pipeline registry
-    import UnicodeSplitter
+    from . import UnicodeSplitter
 
     # Plone content
 
     # Usage of PloneFolder is discouraged.
-    import PloneFolder
+    from . import PloneFolder
 
     contentClasses = (PloneFolder.PloneFolder, )
     contentConstructors = (PloneFolder.addPloneFolder, )
@@ -142,26 +145,26 @@ def initialize(context):
     from Products.CMFCore import CachingPolicyManager
 
     # Plone tools
-    import PloneTool
-    import FactoryTool
-    import InterfaceTool
-    import MigrationTool
-    import PloneControlPanel
-    import WorkflowTool
-    import URLTool
-    import MetadataTool
-    import RegistrationTool
-    import PropertiesTool
-    import ActionsTool
-    import TypesTool
-    import UndoTool
-    import CatalogTool
-    import SkinsTool
-    import DiscussionTool
-    import CalendarTool
-    import ActionIconsTool
-    import QuickInstallerTool
-    import TranslationServiceTool
+    from . import PloneTool
+    from . import FactoryTool
+    from . import InterfaceTool
+    from . import MigrationTool
+    from . import PloneControlPanel
+    from . import WorkflowTool
+    from . import URLTool
+    from . import MetadataTool
+    from . import RegistrationTool
+    from . import PropertiesTool
+    from . import ActionsTool
+    from . import TypesTool
+    from . import UndoTool
+    from . import CatalogTool
+    from . import SkinsTool
+    from . import DiscussionTool
+    from . import CalendarTool
+    from . import ActionIconsTool
+    from . import QuickInstallerTool
+    from . import TranslationServiceTool
 
     tools = (PloneTool.PloneTool,
              WorkflowTool.WorkflowTool,

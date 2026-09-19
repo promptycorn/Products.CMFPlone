@@ -93,6 +93,27 @@
       permission="zope.Public"
       />
 
+  <browser:page
+      for="Products.CMFPlone.interfaces.IPloneSiteRoot"
+      name="login"
+      class=".login_compat.LegacyLoginFormView"
+      permission="zope.Public"
+      />
+
+  <browser:page
+      for="Products.CMFPlone.interfaces.IPloneSiteRoot"
+      name="login_form"
+      class=".login_compat.LegacyLoginFormView"
+      permission="zope.Public"
+      />
+
+  <browser:page
+      for="*"
+      name="mark-archetypes-document-read-safe"
+      class=".csrf_compat.MarkArchetypesDocumentReadSafe"
+      permission="zope2.View"
+      />
+
   <!-- Useful for cross domain iframe proxying -->
   <browser:resource
       file="blank.html"

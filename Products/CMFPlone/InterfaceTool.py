@@ -1,5 +1,5 @@
 from zope.dottedname.resolve import resolve
-from zope.interface import implements
+from zope.interface import implementer
 from zope.interface import implementedBy
 from zope.interface import Interface
 from zope.interface.interfaces import IMethod
@@ -10,19 +10,19 @@ from Products.CMFCore.utils import registerToolInterface
 from Products.CMFCore.utils import UniqueObject
 
 from OFS.SimpleItem import SimpleItem
-from App.class_init import InitializeClass
+from AccessControl.class_init import InitializeClass
 from AccessControl import ClassSecurityInfo
 from Products.CMFPlone.PloneBaseTool import PloneBaseTool
 
 _marker = ('module_finder', )
 
 
+@implementer(IInterfaceTool)
 class InterfaceTool(PloneBaseTool, UniqueObject, SimpleItem):
     """ This tool exposes the interface package for TTW applications,
     by accepting a dotted name of an interface and exporting the
     IInterface API """
 
-    implements(IInterfaceTool)
 
     id = 'portal_interface'
     meta_type = 'Portal Interface Tool'

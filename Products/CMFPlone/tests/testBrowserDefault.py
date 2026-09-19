@@ -228,14 +228,14 @@ class TestDefaultPage(PloneTestCase.PloneTestCase):
         self.default = sp.getProperty('default_page', [])
 
     def testDefaultPageSetting(self):
-        self.assertEquals(self.default, ('index_html', 'index.html',
+        self.assertEqual(self.default, ('index_html', 'index.html',
                                          'index.htm', 'FrontPage'))
 
     def testBrowserDefaultPage(self):
         # Test assumes ATContentTypes + BrowserDefaultMixin
         self.folder.invokeFactory('Document', 'd1', title='document 1')
         self.folder.setDefaultPage('d1')
-        self.assertEquals(self.portal.plone_utils.browserDefault(self.folder),
+        self.assertEqual(self.portal.plone_utils.browserDefault(self.folder),
                             (self.folder, ['d1']))
 
 

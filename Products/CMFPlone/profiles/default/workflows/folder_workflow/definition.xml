@@ -158,7 +158,7 @@
   <description i18n:translate="">Previous transition</description>
   <default>
 
-   <expression>transition/getId|nothing</expression>
+   <expression>python:transition and transition.getId() or None</expression>
   </default>
   <guard>
   </guard>
@@ -170,7 +170,7 @@
   </description>
   <default>
 
-   <expression>user/getId</expression>
+   <expression>python:user.getId()</expression>
   </default>
   <guard>
   </guard>
@@ -190,7 +190,7 @@
   <description i18n:translate="">Provides access to workflow history</description>
   <default>
 
-   <expression>state_change/getHistory</expression>
+   <expression>python:state_change.getHistory()</expression>
   </default>
   <guard>
    <guard-permission>Request review</guard-permission>
@@ -204,7 +204,7 @@
   </description>
   <default>
 
-   <expression>state_change/getDateTime</expression>
+   <expression>python:state_change.getDateTime()</expression>
   </default>
   <guard>
   </guard>

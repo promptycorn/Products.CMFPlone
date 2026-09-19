@@ -104,7 +104,7 @@ class TestMigrationWithExtraUpgrades(PloneTestCase.PloneTestCase):
 
         # Register a too new upgrade.
         fs_version = self.migration.getFileSystemVersion()
-        new_version = unicode(int(fs_version) + 1)
+        new_version = str(int(fs_version) + 1)
         new_step = UpgradeStep(
             'Too new upgrade', _DEFAULT_PROFILE,
             fs_version, new_version,
@@ -160,17 +160,17 @@ class TestAddonList(PloneTestCase.PloneTestCase):
     def test_addon_repr(self):
         from Products.CMFPlone.MigrationTool import Addon
         addon = Addon(profile_id='foo')
-        self.assertEqual(repr(addon), u'<Addon profile foo>')
+        self.assertEqual(repr(addon), '<Addon profile foo>')
         self.assertEqual(str(addon), '<Addon profile foo>')
 
     def test_upgrade_all(self):
         from Products.CMFPlone.MigrationTool import Addon
         from Products.CMFPlone.MigrationTool import AddonList
         # real ones:
-        cmfeditions = Addon(profile_id=u'Products.CMFEditions:CMFEditions')
-        discussion = Addon(profile_id=u'plone.app.discussion:default')
+        cmfeditions = Addon(profile_id='Products.CMFEditions:CMFEditions')
+        discussion = Addon(profile_id='plone.app.discussion:default')
         # real one with failing check_module:
-        dexterity = Addon(profile_id=u'plone.app.dexterity:default',
+        dexterity = Addon(profile_id='plone.app.dexterity:default',
                           check_module='no.such.module')
         # non-existing one:
         foo = Addon(profile_id='foo')

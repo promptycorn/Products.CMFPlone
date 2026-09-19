@@ -1,2 +1,2 @@
 # misc security fixes
-import security  # noqa
+from . import security  # noqa

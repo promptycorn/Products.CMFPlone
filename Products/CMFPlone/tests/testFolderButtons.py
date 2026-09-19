@@ -1,4 +1,4 @@
-from cStringIO import StringIO
+from io import StringIO
 from zExceptions import Forbidden
 from zope.interface import directlyProvides
 from zope import component
@@ -112,8 +112,8 @@ class TestFolderRename(PloneTestCase.PloneTestCase):
                           [doc1_path], ['bar'], ['Baz'])
 
     def testGetObjectsFromPathList(self):
-        doc1_path = unicode('/'.join(self.folder.foo.doc1.getPhysicalPath()))
-        doc2_path = unicode('/'.join(self.folder.bar.doc2.getPhysicalPath()))
+        doc1_path = str('/'.join(self.folder.foo.doc1.getPhysicalPath()))
+        doc2_path = str('/'.join(self.folder.bar.doc2.getPhysicalPath()))
         self.assertEqual(
             len(self.folder.getObjectsFromPathList([doc1_path, doc2_path])), 2)
 

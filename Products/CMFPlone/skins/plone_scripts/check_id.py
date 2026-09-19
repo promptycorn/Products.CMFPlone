@@ -38,9 +38,18 @@ from Products.CMFPlone.utils import base_hasattr
 ts = getToolByName(context, 'translation_service')
 
 
+def ensure_text(value):
+    if isinstance(value, bytes):
+        return value.decode('utf-8', 'replace')
+    return value
+
+
 def xlate(message):
     return ts.translate(message, context=context.REQUEST)
 
+
+id = ensure_text(id)
+alternative_id = ensure_text(alternative_id)
 
 # if an alternative id has been supplied, see if we need to use it
 if alternative_id and not id:
@@ -49,7 +58,7 @@ if alternative_id and not id:
 # make sure we have an id if one is required
 if not id:
     if required:
-        return _(u'Please enter a name.')
+        return _('Please enter a name.')
 
     # Id is not required and no alternative was specified, so assume the
     # object's id will be context.getId(). We still should check to make sure
@@ -67,7 +76,7 @@ if not id:
 # check for reserved names
 if id in ('login', 'layout', 'plone', 'zip', 'properties', ):
     return xlate(
-        _(u'${name} is reserved.',
+        _('${name} is reserved.',
           mapping={'name': id}))
 
 # check for bad characters
@@ -75,21 +84,21 @@ plone_utils = getToolByName(container, 'plone_utils', None)
 if plone_utils is not None:
     bad_chars = plone_utils.bad_chars(id)
     if len(bad_chars) > 0:
-        bad_chars = ''.join(bad_chars).decode('utf-8')
-        decoded_id = id.decode('utf-8')
+        bad_chars = ensure_text(''.join(bad_chars))
+        decoded_id = ensure_text(id)
         return xlate(
-            _(u'${name} is not a legal name. The following characters are '
-              u'invalid: ${characters}',
-              mapping={u'name': decoded_id, u'characters': bad_chars}))
+            _('${name} is not a legal name. The following characters are '
+              'invalid: ${characters}',
+              mapping={'name': decoded_id, 'characters': bad_chars}))
 
 # check for a catalog index
 portal_catalog = getToolByName(container, 'portal_catalog', None)
 if portal_catalog is not None:
     try:
-        if id in portal_catalog.indexes() + portal_catalog.schema():
+        if id in list(portal_catalog.indexes()) + list(portal_catalog.schema()):
             return xlate(
-                _(u'${name} is reserved.',
-                  mapping={u'name': id}))
+                _('${name} is reserved.',
+                  mapping={'name': id}))
     except Unauthorized:
         # ignore if we don't have permission; will get picked up at the end
         pass
@@ -129,21 +138,21 @@ if checkForCollision:
             existing_obj = getattr(contained_by, id, None)
             if base_hasattr(existing_obj, 'portal_type'):
                 return xlate(
-                    _(u'There is already an item named ${name} in this '
-                      u'folder.',
-                      mapping={u'name': id}))
+                    _('There is already an item named ${name} in this '
+                      'folder.',
+                      mapping={'name': id}))
         except Unauthorized:
             # we can't access the object: safe to assume we can't replace it
             return xlate(
-                _(u'There is already an item named ${name} in this folder.',
-                  mapping={u'name': id}))
+                _('There is already an item named ${name} in this folder.',
+                  mapping={'name': id}))
 
     if base_hasattr(contained_by, 'checkIdAvailable'):
         try:
             if not contained_by.checkIdAvailable(id):
                 return xlate(
-                    _(u'${name} is reserved.',
-                      mapping={u'name': id}))
+                    _('${name} is reserved.',
+                      mapping={'name': id}))
         except Unauthorized:
             pass  # ignore if we don't have permission
 
@@ -157,8 +166,8 @@ if checkForCollision:
             raise
         except:
             return xlate(
-                _(u'${name} is reserved.',
-                  mapping={u'name': id}))
+                _('${name} is reserved.',
+                  mapping={'name': id}))
 
     # make sure we don't collide with any parent method aliases
     portal_types = getToolByName(context, 'portal_types', None)
@@ -167,10 +176,10 @@ if checkForCollision:
         if parentFti is not None:
             aliases = plone_utils.getMethodAliases(parentFti)
             if aliases is not None:
-                if id in aliases.keys():
+                if id in list(aliases.keys()):
                     return xlate(
-                        _(u'${name} is reserved.',
-                          mapping={u'name': id}))
+                        _('${name} is reserved.',
+                          mapping={'name': id}))
 
     # Lastly, we want to disallow the id of any of the tools in the portal
     # root, as well as any object that can be acquired via portal_skins.
@@ -193,7 +202,7 @@ if checkForCollision:
                 # but not other things
                 if getattr(portal, id, None) is not None:
                     return xlate(
-                        _(u'${name} is reserved.',
-                          mapping={u'name': id}))
+                        _('${name} is reserved.',
+                          mapping={'name': id}))
             except Unauthorized:
                 pass  # ignore if we don't have permission

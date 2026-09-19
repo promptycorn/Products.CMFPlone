@@ -190,7 +190,7 @@ class TestPloneTool(PloneTestCase.PloneTestCase):
             self.utils.reindexOnReorder("fake_context")
         finally:
             gsm.unregisterHandler(my_handler, (Interface, IReorderedEvent))
-        self.assertEquals(["fake_context"], reordered_parents)
+        self.assertEqual(["fake_context"], reordered_parents)
 
 class TestOwnershipStuff(PloneTestCase.PloneTestCase):
 
@@ -623,7 +623,7 @@ class TestIDGenerationMethods(PloneTestCase.PloneTestCase):
         new_obj = new_obj.__of__(self.folder)
         try:
             title = self.utils.pretty_title_or_id(new_obj)
-        except AttributeError, e:
+        except AttributeError as e:
             self.fail('pretty_title_or_id failed to include context %s' % e)
         self.assertEqual(title, 'portal_catalog')
 
@@ -675,5 +675,5 @@ class TestIDGenerationMethods(PloneTestCase.PloneTestCase):
         expectedAliases = fti.getMethodAliases()
         aliases = self.utils.getMethodAliases(fti)
         self.assertEqual(len(expectedAliases), len(aliases))
-        for k, v in aliases.items():
+        for k, v in list(aliases.items()):
             self.assertEqual(expectedAliases[k], v)

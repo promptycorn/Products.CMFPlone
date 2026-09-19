@@ -1,10 +1,10 @@
 from AccessControl import ClassSecurityInfo
 from App.special_dtml import DTMLFile
-from App.class_init import InitializeClass
+from AccessControl.class_init import InitializeClass
 from OFS.Folder import Folder
 from OFS.PropertyManager import PropertyManager
 
-from zope.interface import implements
+from zope.interface import implementer
 from zope.i18n import translate
 from zope.i18nmessageid import Message
 
@@ -43,13 +43,13 @@ class PloneConfiglet(ActionInformation):
         return res
 
 
+@implementer(IControlPanel)
 class PloneControlPanel(PloneBaseTool, UniqueObject,
                         Folder, ActionProviderBase, PropertyManager):
     """Weave together the various sources of "actions" which
     are apropos to the current user and context.
     """
 
-    implements(IControlPanel)
 
     security = ClassSecurityInfo()
 
@@ -64,10 +64,10 @@ class PloneControlPanel(PloneBaseTool, UniqueObject,
 
     group = dict(
         member=[
-            ('Member', _(u'My Preferences')),
+            ('Member', _('My Preferences')),
         ],
-        site=[('Plone', _(u'Plone Configuration')),
-              ('Products', _(u'Add-on Configuration')),
+        site=[('Plone', _('Plone Configuration')),
+              ('Products', _('Add-on Configuration')),
              ]
     )
 
@@ -148,7 +148,9 @@ class PloneControlPanel(PloneBaseTool, UniqueObject,
 
         # BBB
         actionicons = getToolByName(self, 'portal_actionicons', None)
-        if actionicons is not None:
+        if (actionicons is not None and
+                hasattr(actionicons, 'queryActionInfo') and
+                hasattr(actionicons, 'removeActionIcon')):
             if actionicons.queryActionInfo('controlpanel', id, None):
                 actionicons.removeActionIcon('controlpanel', id)
 
@@ -160,7 +162,9 @@ class PloneControlPanel(PloneBaseTool, UniqueObject,
 
         # BBB
         actionicons = getToolByName(self, 'portal_actionicons', None)
-        if actionicons is not None:
+        if (actionicons is not None and
+                hasattr(actionicons, 'queryActionInfo') and
+                hasattr(actionicons, 'removeActionIcon')):
             for a in acts:
                 if (a.appId == appId and
                     actionicons.queryActionInfo('controlpanel', a.id, None)):
@@ -182,10 +186,10 @@ class PloneControlPanel(PloneBaseTool, UniqueObject,
         if not name:
             raise ValueError('A name is required.')
 
-        if action is not '':
+        if action != '':
             action = Expression(text=action)
 
-        if condition is not '':
+        if condition != '':
             condition = Expression(text=condition)
 
         if category == '':

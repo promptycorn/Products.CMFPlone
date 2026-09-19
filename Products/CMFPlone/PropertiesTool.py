@@ -4,8 +4,8 @@ from Products.CMFDefault.PropertiesTool import PropertiesTool as BaseTool
 
 from Products.PageTemplates.PageTemplateFile import PageTemplateFile
 from OFS.Folder import Folder
-from App.class_init import InitializeClass
-from zope.interface import implements
+from AccessControl.class_init import InitializeClass
+from zope.interface import implementer
 
 from OFS.PropertyManager import PropertyManager
 from OFS.SimpleItem import SimpleItem
@@ -15,6 +15,7 @@ from Products.CMFPlone.interfaces \
     import IPropertiesTool, ISimpleItemWithProperties
 
 
+@implementer(IPropertiesTool)
 class PropertiesTool(PloneBaseTool, Folder, BaseTool):
 
     id = BaseTool.id
@@ -26,7 +27,6 @@ class PropertiesTool(PloneBaseTool, Folder, BaseTool):
          'action': 'manage_addPropertySheetForm'},
         ))
 
-    implements(IPropertiesTool)
 
     manage_options = ((Folder.manage_options[0], ) +
                         BaseTool.manage_options)
@@ -92,13 +92,13 @@ PropertiesTool.__doc__ = BaseTool.__doc__
 InitializeClass(PropertiesTool)
 
 
+@implementer(ISimpleItemWithProperties)
 class SimpleItemWithProperties (PropertyManager, SimpleItem):
     """
     A common base class for objects with configurable
     properties in a fixed schema.
     """
 
-    implements(ISimpleItemWithProperties)
 
     def __init__(self, id, title=''):
         self.id = id

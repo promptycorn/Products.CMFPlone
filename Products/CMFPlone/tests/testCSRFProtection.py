@@ -1,7 +1,7 @@
 from Products.PloneTestCase import PloneTestCase as ptc
 
 from zope.component import queryUtility
-from StringIO import StringIO
+from io import StringIO
 
 from plone.keyring.interfaces import IKeyManager
 from plone.protect.authenticator import AuthenticatorView

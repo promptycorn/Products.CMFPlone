@@ -12,9 +12,9 @@
         <metal:field use-macro="python:context.widget('text', mode='view')">
             Body text
         </metal:field>
+        <tal:safe replace="structure python:context.restrictedTraverse('@@mark-archetypes-document-read-safe')()" />
     </metal:content-core>
 </metal:content-core>
 
 </body>
 </html>
-

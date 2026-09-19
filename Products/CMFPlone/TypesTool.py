@@ -1,5 +1,5 @@
 from AccessControl import ClassSecurityInfo
-from App.class_init import InitializeClass
+from AccessControl.class_init import InitializeClass
 
 from Products.CMFCore.ActionInformation import ActionInfo
 from Products.CMFCore.interfaces import IAction
@@ -41,7 +41,7 @@ class TypesTool(PloneBaseTool, BaseTool):
                 actions.extend(type_actions)
 
         if category == 'folder/add':
-            add_actions = [ti for ti in self.values()
+            add_actions = [ti for ti in list(self.values())
                             if IAction.providedBy(ti)]
             actions.extend(add_actions)
 
@@ -63,7 +63,7 @@ class TypesTool(PloneBaseTool, BaseTool):
 
         if action_chain:
             filtered_actions = []
-            if isinstance(action_chain, basestring):
+            if isinstance(action_chain, str):
                 action_chain = (action_chain, )
             for action_ident in action_chain:
                 sep = action_ident.rfind('/')

@@ -1,13 +1,20 @@
-from email.Utils import getaddresses
+try:
+    from email.utils import getaddresses
+except ImportError:
+    from email.Utils import getaddresses
 import re
 import sys
-from types import UnicodeType, StringType
-import urlparse
+try:
+    from types import UnicodeType, StringType
+except ImportError:
+    UnicodeType = str
+    StringType = str
+import urllib.parse
 import transaction
 
 from zope.component import queryAdapter
 from zope.deprecation import deprecate
-from zope.interface import implements
+from zope.interface import implementer
 from zope.event import notify
 from zope.lifecycleevent import ObjectModifiedEvent
 
@@ -18,7 +25,7 @@ from Acquisition import aq_inner
 from Acquisition import aq_parent
 from ComputedAttribute import ComputedAttribute
 from DateTime import DateTime
-from App.class_init import InitializeClass
+from AccessControl.class_init import InitializeClass
 from OFS.SimpleItem import SimpleItem
 from OFS.ObjectManager import bad_id
 from ZODB.POSException import ConflictError
@@ -74,14 +81,9 @@ EMAIL_RE = re.compile(r"^(\w&.%#$&'\*+-/=?^_`{}|~]+!)*[\w&.%#$&'\*+-/=?^_`{}|~]+
 # used to find double new line (in any variant)
 EMAIL_CUTOFF_RE = re.compile(r".*[\n\r][\n\r]")
 
-# XXX Remove this when we don't depend on python2.1 any longer,
-# use email.Utils.getaddresses instead
-from rfc822 import AddressList
 def _getaddresses(fieldvalues):
     """Return a list of (REALNAME, EMAIL) for each fieldvalue."""
-    all = ', '.join(fieldvalues)
-    a = AddressList(all)
-    return a.addresslist
+    return getaddresses(fieldvalues)
 
 # dublic core accessor name -> metadata name
 METADATA_DCNAME = {
@@ -103,6 +105,7 @@ METADATA_DCNAME = {
 METADATA_DC_AUTHORFIELDS = ('Creator', 'Contributors', 'Publisher')
 
 
+@implementer(IPloneTool)
 class PloneTool(PloneBaseTool, UniqueObject, SimpleItem):
     """Various utility methods."""
 
@@ -114,7 +117,6 @@ class PloneTool(PloneBaseTool, UniqueObject, SimpleItem):
     # Prefix for forms fields!?
     field_prefix = 'field_'
 
-    implements(IPloneTool)
 
     security.declareProtected(ManageUsers, 'setMemberProperties')
     def setMemberProperties(self, member, REQUEST=None, **properties):
@@ -199,7 +201,7 @@ class PloneTool(PloneBaseTool, UniqueObject, SimpleItem):
     def validateSingleNormalizedEmailAddress(self, address):
         # Lower-level function to validate a single normalized email address,
         # see validateEmailAddress.
-        if not isinstance(address, basestring):
+        if not isinstance(address, str):
             return False
 
         sub = EMAIL_CUTOFF_RE.match(address)
@@ -216,7 +218,7 @@ class PloneTool(PloneBaseTool, UniqueObject, SimpleItem):
     security.declarePublic('validateSingleEmailAddress')
     def validateSingleEmailAddress(self, address):
         # Validate a single email address, see also validateEmailAddresses.
-        if not isinstance(address, basestring):
+        if not isinstance(address, str):
             return False
 
         sub = EMAIL_CUTOFF_RE.match(address)
@@ -239,7 +241,7 @@ class PloneTool(PloneBaseTool, UniqueObject, SimpleItem):
     def validateEmailAddresses(self, addresses):
         # Validate a list of possibly several email addresses, see also
         # validateSingleEmailAddress.
-        if not isinstance(addresses, basestring):
+        if not isinstance(addresses, str):
             return False
 
         sub = EMAIL_CUTOFF_RE.match(addresses)
@@ -273,7 +275,7 @@ class PloneTool(PloneBaseTool, UniqueObject, SimpleItem):
             return request.form.get(pfx + name, default)
 
         def tuplify(value):
-            return tuple(filter(None, value))
+            return tuple([_f for _f in value if _f])
 
         if IDublinCore.providedBy(obj):
             if title is None:
@@ -367,7 +369,7 @@ class PloneTool(PloneBaseTool, UniqueObject, SimpleItem):
         # Encapsulates how the editing of content occurs.
         try:
             self.editMetadata(obj, **kwargs)
-        except AttributeError, msg:
+        except AttributeError as msg:
             log('Failure editing metadata at: %s.\n%s\n' %
                 (obj.absolute_url(), msg))
         if kwargs.get('id', None) is not None:
@@ -416,7 +418,7 @@ class PloneTool(PloneBaseTool, UniqueObject, SimpleItem):
                 return icon
 
         # Short circuit the lookup
-        if (category, id) in _icons.keys():
+        if (category, id) in list(_icons.keys()):
             return _icons[(category, id)]
         try:
             # BBB icon lookup on action icons tool
@@ -537,7 +539,7 @@ class PloneTool(PloneBaseTool, UniqueObject, SimpleItem):
         New in Python 2.6: urlparse now returns a ParseReusult object.
         We just need the tuple form which is tuple(result).
         """
-        return tuple(urlparse.urlparse(url))
+        return tuple(urllib.parse.urlparse(url))
 
     security.declarePublic('urlunparse')
     def urlunparse(self, url_tuple):
@@ -552,7 +554,7 @@ class PloneTool(PloneBaseTool, UniqueObject, SimpleItem):
         >>> ptool.urlunparse(('http', 'plone.org', '/support', '', '', 'users'))
         'http://plone.org/support#users'
         """
-        return urlparse.urlunparse(url_tuple)
+        return urllib.parse.urlunparse(url_tuple)
 
     # Enable scripts to get the string value of an exception even if the
     # thrown exception is a string and not a subclass of Exception.
@@ -675,7 +677,9 @@ class PloneTool(PloneBaseTool, UniqueObject, SimpleItem):
         # Only considers explicitly contained objects, either set as index_html,
         # with the default_page property, or using IBrowserDefault.
         if request is None:
-            request = self.REQUEST
+            request = getattr(self, 'REQUEST', None)
+            if request is None:
+                request = getattr(obj, 'REQUEST', None)
         return utils.isDefaultPage(obj, request)
 
     security.declarePublic('getDefaultPage')
@@ -697,7 +701,9 @@ class PloneTool(PloneBaseTool, UniqueObject, SimpleItem):
         # returned. If a non-folderish item is passed in, return None always.
 
         if request is None:
-            request = self.REQUEST
+            request = getattr(self, 'REQUEST', None)
+            if request is None:
+                request = getattr(obj, 'REQUEST', None)
         return utils.getDefaultPage(obj, request)
 
     security.declarePublic('addPortalMessage')
@@ -798,6 +804,8 @@ class PloneTool(PloneBaseTool, UniqueObject, SimpleItem):
         # means acquire PROPFIND from the folder and call it
         # its all very odd and WebDAV'y
         request = getattr(self, 'REQUEST', None)
+        if request is None:
+            request = getattr(obj, 'REQUEST', None)
         if request is not None and 'REQUEST_METHOD' in request:
             if request['REQUEST_METHOD'] not in ['GET', 'POST']:
                 return obj, [request['REQUEST_METHOD']]
@@ -831,7 +839,7 @@ class PloneTool(PloneBaseTool, UniqueObject, SimpleItem):
         #
 
         if obj.isPrincipiaFolderish:
-            defaultPage = self.getDefaultPage(obj)
+            defaultPage = self.getDefaultPage(obj, request=request)
             if defaultPage is not None:
                 if defaultPage in obj:
                     return obj, [defaultPage]
@@ -1042,7 +1050,7 @@ class PloneTool(PloneBaseTool, UniqueObject, SimpleItem):
         else:
             metadata_names = METADATA_DCNAME
 
-        for accessor, key in metadata_names.items():
+        for accessor, key in list(metadata_names.items()):
             # check non-public properties
             if not view_about and accessor in METADATA_DC_AUTHORFIELDS:
                 continue
@@ -1151,7 +1159,7 @@ class PloneTool(PloneBaseTool, UniqueObject, SimpleItem):
         blacklistedTypes = siteProperties.getProperty('types_not_searched', [])
 
         ttool = getToolByName(self, 'portal_types')
-        tool_types = ttool.keys()
+        tool_types = list(ttool.keys())
         if typesList:
             types = [t for t in typesList if t in tool_types]
         else:
@@ -1240,7 +1248,7 @@ class PloneTool(PloneBaseTool, UniqueObject, SimpleItem):
                 raise
             except LinkIntegrityNotificationException:
                 raise
-            except Exception, e:
+            except Exception as e:
                 if handle_errors:
                     sp.rollback()
                     failure[path] = e
@@ -1272,7 +1280,7 @@ class PloneTool(PloneBaseTool, UniqueObject, SimpleItem):
                                             expiration_date=expiration_date)
             except ConflictError:
                 raise
-            except Exception, e:
+            except Exception as e:
                 if handle_errors:
                     # skip this object but continue with sub-objects.
                     sp.rollback()
@@ -1331,14 +1339,14 @@ class PloneTool(PloneBaseTool, UniqueObject, SimpleItem):
                     success[path] = (new_id, new_title)
             except ConflictError:
                 raise
-            except Exception, e:
+            except Exception as e:
                 if handle_errors:
                     # skip this object but continue with sub-objects.
                     sp.rollback()
                     failure[path] = e
                 else:
                     raise
-        transaction_note('Renamed %s' % str(success.keys()))
+        transaction_note('Renamed %s' % str(list(success.keys())))
         return success, failure
     renameObjectsByPaths = postonly(renameObjectsByPaths)
 

@@ -31,7 +31,7 @@ value = tool.translate(msgid,
 if not value and default is None:
     value = msgid
 
-    for k, v in mapping.items():
+    for k, v in list(mapping.items()):
         value = value.replace('${%s}' % k, v)
 
 if escape_for_js:

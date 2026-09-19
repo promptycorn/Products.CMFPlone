@@ -3,7 +3,7 @@
 # strategy/filtering method that uses Plone's navtree_properties to construct
 # navtrees.
 
-from zope.interface import implements
+from zope.interface import implementer
 from zope.component import getMultiAdapter, queryUtility
 
 from plone.app.layout.navigation.interfaces import INavigationQueryBuilder
@@ -28,10 +28,10 @@ security.declarePrivate('plone')
 security.declarePrivate('utils')
 
 
+@implementer(INavigationQueryBuilder)
 class NavtreeQueryBuilder(object):
     """Build a navtree query based on the settings in navtree_properties
     """
-    implements(INavigationQueryBuilder)
 
     def __init__(self, context):
         portal_properties = getToolByName(context, 'portal_properties')
@@ -101,11 +101,11 @@ class SitemapQueryBuilder(NavtreeQueryBuilder):
                               'depth': sitemapDepth}
 
 
+@implementer(INavtreeStrategy)
 class SitemapNavtreeStrategy(NavtreeStrategyBase):
     """The navtree building strategy used by the sitemap, based on
     navtree_properties
     """
-    implements(INavtreeStrategy)
     # adapts(*, ISiteMap)
 
     def __init__(self, context, view=None):
@@ -171,7 +171,7 @@ class SitemapNavtreeStrategy(NavtreeStrategyBase):
                 (portalType is None or portalType not in self.parentTypesNQ):
             showChildren = True
 
-        ploneview = getMultiAdapter((context, request), name=u'plone')
+        ploneview = getMultiAdapter((context, request), name='plone')
 
         newNode['Title'] = utils.pretty_title_or_id(context, item)
         newNode['id'] = item.getId
@@ -210,10 +210,10 @@ class SitemapNavtreeStrategy(NavtreeStrategyBase):
         return True
 
 
+@implementer(INavtreeStrategy)
 class DefaultNavtreeStrategy(SitemapNavtreeStrategy):
     """The navtree strategy used for the default navigation portlet
     """
-    implements(INavtreeStrategy)
     # adapts(*, INavigationTree)
 
     def __init__(self, context, view=None):

@@ -6,15 +6,11 @@
     directory="Products.ATContentTypes:skins/ATContentTypes"/>
  <object name="referencebrowser" meta_type="Filesystem Directory View"
     directory="archetypes.referencebrowserwidget:skins/referencebrowser"/>
- <object name="LanguageTool" meta_type="Filesystem Directory View"
-    directory="Products.PloneLanguageTool:skins/LanguageTool"/>
  <object name="archetypes" meta_type="Filesystem Directory View"
     directory="Products.Archetypes:skins/archetypes"/>
  <object name="cmf_legacy" meta_type="Filesystem Directory View"
     directory="Products.CMFPlone:skins/cmf_legacy"/>
  <object name="custom" meta_type="Folder"/>
- <object name="PasswordReset" meta_type="Filesystem Directory View"
-    directory="Products.PasswordResetTool:skins/PasswordReset"/>
  <object name="mimetypes_icons" meta_type="Filesystem Directory View"
     directory="Products.MimetypesRegistry:skins/mimetypes_icons"/>
  <object name="plone_3rdParty" meta_type="Filesystem Directory View"
@@ -49,8 +45,6 @@
   <layer name="referencebrowser"/>
   <layer name="archetypes"/>
   <layer name="mimetypes_icons"/>
-  <layer name="PasswordReset"/>
-  <layer name="LanguageTool"/>
   <layer name="plone_ecmascript"/>
   <layer name="plone_wysiwyg"/>
   <layer name="plone_prefs"/>

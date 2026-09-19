@@ -1,8 +1,8 @@
 from Products.CMFPlone.tests import PloneTestCase
 
 import base64
-from urlparse import urlparse
-from urllib import urlencode
+from urllib.parse import urlparse
+from urllib.parse import urlencode
 
 default_user = PloneTestCase.default_user
 default_password = PloneTestCase.default_password

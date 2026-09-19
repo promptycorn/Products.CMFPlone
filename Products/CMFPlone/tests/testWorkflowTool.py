@@ -25,7 +25,7 @@ workflow_dict = {
 }
 # then we join all states into one master list
 all_states = []
-for states in workflow_dict.values():
+for states in list(workflow_dict.values()):
     all_states += list(states)
 
 

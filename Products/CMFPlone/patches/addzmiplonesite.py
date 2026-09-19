@@ -35,4 +35,5 @@ new = orig[:pos] + ADD_PLONE_SITE_HTML + orig[pos:]
 
 # Modify the manage_main
 main.edited_source = new
-main._v_cooked = main.cook()
+if hasattr(main, 'cook'):
+    main._v_cooked = main.cook()

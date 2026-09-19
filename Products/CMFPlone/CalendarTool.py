@@ -1,7 +1,7 @@
 from Products.CMFCalendar.CalendarTool import CalendarTool as BaseTool
 from Products.CMFCore.utils import getToolByName
 from AccessControl import ClassSecurityInfo
-from App.class_init import InitializeClass
+from AccessControl.class_init import InitializeClass
 from Products.CMFPlone.PloneBaseTool import PloneBaseTool
 
 
@@ -120,7 +120,7 @@ class CalendarTool(PloneBaseTool, BaseTool):
             event['title'] = result.Title or result.getId
 
             if eventStartDay != eventEndDay:
-                allEventDays = range(eventStartDay, eventEndDay + 1)
+                allEventDays = list(range(eventStartDay, eventEndDay + 1))
                 eventDays[eventStartDay]['eventslist'].append(
                         {'end': None,
                          'start': result.start.Time(),

@@ -88,9 +88,9 @@ class TestRegistrationTool(PloneTestCase.PloneTestCase):
 
     def testTestPasswordValidityConfirm(self):
         # https://dev.plone.org/ticket/13325
-        self.failUnless(self.registration.testPasswordValidity(
+        self.assertTrue(self.registration.testPasswordValidity(
             'validpassword', confirm=None) is None)
-        self.failIf(self.registration.testPasswordValidity(
+        self.assertFalse(self.registration.testPasswordValidity(
             'validpassword', confirm='anotherpassword') is None)
 
     def testTestPasswordValidityPolicy(self):
@@ -293,11 +293,11 @@ class TestEmailValidityChecker(unittest.TestCase):
         self.assertTrue(*result)
 
     def test_idn_cc_tld(self):
-        result = self.check(u"webmaster@example.xn--wgbh1c")
+        result = self.check("webmaster@example.xn--wgbh1c")
         self.assertTrue(*result)
 
     def test_long_tld(self):
-        result = self.check(u"webmaster@example.onion")
+        result = self.check("webmaster@example.onion")
         self.assertTrue(*result)
 
 

@@ -7,9 +7,12 @@ Created by Mikio Hokari, CMScom and Manabu Terada, CMScom on 2009-09-30.
 """
 import unicodedata
 
-from zope.interface import implements
+from zope.interface import implementer
 
-from Products.ZCTextIndex.ISplitter import ISplitter
+try:
+    from Products.ZCTextIndex.ISplitter import ISplitter
+except ImportError:
+    from Products.ZCTextIndex.interfaces import ISplitter
 from Products.ZCTextIndex.PipelineFactory import element_factory
 
 from Products.CMFPlone.UnicodeSplitter.config import rx_U, rxGlob_U, \
@@ -27,7 +30,7 @@ def bigram(u, limit=1):
         日本人-> [日本,本人]
         金 -> []
     """
-    return [u[i:i + 2] for i in xrange(len(u) - limit)]
+    return [u[i:i + 2] for i in range(len(u) - limit)]
 
 
 def process_str_post(s, enc='utf-8'):
@@ -36,14 +39,14 @@ def process_str_post(s, enc='utf-8'):
     If decode gets failed, process str as ASCII.
     """
     try:
-        if not isinstance(s, unicode):
+        if not isinstance(s, str):
             uni = s.decode(enc, "strict")
         else:
             uni = s
     except UnicodeDecodeError:
         return s.replace("?", "").replace("*", "")
     try:
-        return uni.replace(u"?", u"").replace(u"*", u"").encode(enc, "strict")
+        return uni.replace("?", "").replace("*", "").encode(enc, "strict")
     except UnicodeEncodeError:
         return s.replace("?", "").replace("*", "")
 
@@ -56,7 +59,7 @@ def process_str(s, enc='utf-8'):
     Splitting depends on locale specified by rx_L.
     """
     try:
-        if not isinstance(s, unicode):
+        if not isinstance(s, str):
             uni = s.decode(enc, "strict")
         else:
             uni = s
@@ -74,7 +77,7 @@ def process_str_glob(s, enc='utf-8'):
     Splitting depends on locale specified by rxGlob_L.
     """
     try:
-        if not isinstance(s, unicode):
+        if not isinstance(s, str):
             uni = s.decode(enc, "strict")
         else:
             uni = s
@@ -106,7 +109,7 @@ def process_unicode_glob(uni):
     normalized = unicodedata.normalize('NFKC', uni)
     for word in rxGlob_U.findall(normalized):
         swords = [g.group() for g in pattern_g.finditer(word)
-                  if g.group() not in u"*?"]
+                  if g.group() not in "*?"]
         for i, sword in enumerate(swords):
             if not rx_all.match(sword[0]):
                 yield sword
@@ -116,16 +119,16 @@ def process_unicode_glob(uni):
                 else:
                     limit = 0
                 if len(sword) == 1:
-                    bigramed = [sword + u"*"]
+                    bigramed = [sword + "*"]
                 else:
                     bigramed = bigram(sword, limit)
                 for x in bigramed:
                     yield x
 
 
+@implementer(ISplitter)
 class Splitter(object):
 
-    implements(ISplitter)
 
     def process(self, lst):
         """ Will be called when indexing.
@@ -165,8 +168,8 @@ class CaseNormalizer(object):
             # This is a hack to get the normalizer working with
             # non-unicode text.
             try:
-                if not isinstance(s, unicode):
-                    s = unicode(s, enc)
+                if not isinstance(s, str):
+                    s = str(s, enc)
             except (UnicodeDecodeError, TypeError):
                 result.append(s.lower())
             else:
@@ -189,8 +192,8 @@ class I18NNormalizer(object):
         result = []
         for s in lst:
             try:
-                if not isinstance(s, unicode):
-                    s = unicode(s, enc)
+                if not isinstance(s, str):
+                    s = str(s, enc)
             except (UnicodeDecodeError, TypeError):
                 pass
 

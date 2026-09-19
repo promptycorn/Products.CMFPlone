@@ -1,10 +1,17 @@
 from zope.event import notify
-from zope.interface import implements
-from zope.site.hooks import setSite
+from zope.component import queryUtility
+from zope.interface import implementer
+from zope.component.hooks import setSite
 
+from plone.i18n.interfaces import ILanguageSchema
+from plone.registry.interfaces import IRegistry
+from Products.GenericSetup.interfaces import IBody
 from Products.GenericSetup.tool import SetupTool
+from Products.GenericSetup.ZCatalog.exportimport import ZCatalogXMLAdapter
+from zope.component import queryMultiAdapter
 
 from Products.CMFPlone.events import SiteManagerCreatedEvent
+from Products.CMFPlone.interfaces import IFilterSchema
 from Products.CMFPlone.interfaces import INonInstallable
 from Products.CMFPlone.Portal import PloneSite
 
@@ -16,48 +23,63 @@ _CONTENT_PROFILE = 'Products.CMFPlone:plone-content'
 _IMREALLYPLONE4 = True
 
 
+def _ensureCatalogConfigured(site, setup_tool, profile_id):
+    catalog = getattr(site, 'portal_catalog', None)
+    if catalog is None:
+        return
+    context = setup_tool._getImportContext('profile-%s' % profile_id)
+    body = context.readDataFile('catalog.xml')
+    if body is None:
+        return
+    importer = queryMultiAdapter((catalog, context), IBody)
+    if importer is None:
+        importer = ZCatalogXMLAdapter(catalog, context)
+    importer.filename = 'catalog.xml'
+    importer.body = body
+
+
+@implementer(INonInstallable)
 class HiddenProfiles(object):
-    implements(INonInstallable)
 
     def getNonInstallableProfiles(self):
         return [_DEFAULT_PROFILE,
                 _CONTENT_PROFILE,
-                u'Products.Archetypes:Archetypes',
-                u'Products.CMFDiffTool:CMFDiffTool',
-                u'Products.CMFEditions:CMFEditions',
-                u'Products.CMFFormController:CMFFormController',
-                u'Products.CMFPlone:dependencies',
-                u'Products.CMFPlone:testfixture',
-                u'Products.CMFQuickInstallerTool:CMFQuickInstallerTool',
-                u'Products.NuPlone:uninstall',
-                u'Products.MimetypesRegistry:MimetypesRegistry',
-                u'Products.PasswordResetTool:PasswordResetTool',
-                u'Products.PortalTransforms:PortalTransforms',
-                u'Products.PloneLanguageTool:PloneLanguageTool',
-                u'Products.PlonePAS:PlonePAS',
-                u'archetypes.referencebrowserwidget:default',
-                u'borg.localrole:default',
-                u'Products.TinyMCE:TinyMCE',
-                u'Products.TinyMCE:upgrade_10_to_11',
-                u'Products.TinyMCE:uninstall',
-                u'plone.browserlayer:default',
-                u'plone.keyring:default',
-                u'plone.outputfilters:default',
-                u'plone.portlet.static:default',
-                u'plone.portlet.collection:default',
-                u'plone.protect:default',
-                u'plonetheme.sunburst:uninstall',
-                u'plone.app.blob:default',
-                u'plone.app.blob:file-replacement',
-                u'plone.app.blob:image-replacement',
-                u'plone.app.blob:sample-type',
-                u'plone.app.discussion:default',
-                u'plone.app.folder:default',
-                u'plone.app.imaging:default',
-                u'plone.app.jquery:initial-upgrade',
-                u'plone.app.search:default',
-                u'plone.resource:default',
-                u'collective.z3cform.datetimewidget:default',
+                'Products.Archetypes:Archetypes',
+                'Products.CMFDiffTool:CMFDiffTool',
+                'Products.CMFEditions:CMFEditions',
+                'Products.CMFFormController:CMFFormController',
+                'Products.CMFPlone:dependencies',
+                'Products.CMFPlone:testfixture',
+                'Products.CMFQuickInstallerTool:CMFQuickInstallerTool',
+                'Products.NuPlone:uninstall',
+                'Products.MimetypesRegistry:MimetypesRegistry',
+                'Products.PasswordResetTool:PasswordResetTool',
+                'Products.PortalTransforms:PortalTransforms',
+                'Products.PloneLanguageTool:PloneLanguageTool',
+                'Products.PlonePAS:PlonePAS',
+                'archetypes.referencebrowserwidget:default',
+                'borg.localrole:default',
+                'Products.TinyMCE:TinyMCE',
+                'Products.TinyMCE:upgrade_10_to_11',
+                'Products.TinyMCE:uninstall',
+                'plone.browserlayer:default',
+                'plone.keyring:default',
+                'plone.outputfilters:default',
+                'plone.portlet.static:default',
+                'plone.portlet.collection:default',
+                'plone.protect:default',
+                'plonetheme.sunburst:uninstall',
+                'plone.app.blob:default',
+                'plone.app.blob:file-replacement',
+                'plone.app.blob:image-replacement',
+                'plone.app.blob:sample-type',
+                'plone.app.discussion:default',
+                'plone.app.folder:default',
+                'plone.app.imaging:default',
+                'plone.app.jquery:initial-upgrade',
+                'plone.app.search:default',
+                'plone.resource:default',
+                'collective.z3cform.datetimewidget:default',
                 ]
 
 
@@ -92,6 +114,14 @@ def addPloneSite(context, site_id, title='Plone site', description='',
 
     setup_tool.setBaselineContext('profile-%s' % profile_id)
     setup_tool.runAllImportStepsFromProfile('profile-%s' % profile_id)
+    registry = queryUtility(IRegistry, context=site)
+    if registry is not None:
+        if 'plone.default_language' not in registry:
+            registry.registerInterface(ILanguageSchema, prefix='plone')
+        if 'plone.disable_filtering' not in registry:
+            registry.registerInterface(IFilterSchema, prefix='plone')
+        registry['plone.default_language'] = default_language
+        registry['plone.available_languages'] = [default_language]
     if setup_content:
         setup_tool.runAllImportStepsFromProfile(
                         'profile-%s' % _CONTENT_PROFILE)
@@ -109,6 +139,8 @@ def addPloneSite(context, site_id, title='Plone site', description='',
 
     for extension_id in extension_ids:
         setup_tool.runAllImportStepsFromProfile('profile-%s' % extension_id)
+
+    _ensureCatalogConfigured(site, setup_tool, profile_id)
 
     if snapshot is True:
         setup_tool.createSnapshot('initial_configuration')

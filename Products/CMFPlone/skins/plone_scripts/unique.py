@@ -44,7 +44,7 @@ try:
 except TypeError:
     del u  # move on to the next method
 else:
-    return u.keys()
+    return list(u.keys())
 
 # We can't hash all the elements.  Second fastest is to sort,
 # which brings the equal elements together; then duplicates are

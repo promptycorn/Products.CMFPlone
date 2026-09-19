@@ -6,7 +6,7 @@ from Products.CMFPlone.tests.PloneTestCase import default_password
 
 from Products.CMFCore.utils import getToolByName
 
-from StringIO import StringIO
+from io import StringIO
 
 html = """\
 <html>
@@ -20,12 +20,12 @@ class TestDAVProperties(PloneTestCase.PloneTestCase):
 
     def testPropertiesToolTitle(self):
         ptool = getToolByName(self.portal, 'portal_properties')
-        psets = dict(ptool.propertysheets.items())
-        self.assertTrue('webdav' in psets.keys())
+        psets = dict(list(ptool.propertysheets.items()))
+        self.assertTrue('webdav' in list(psets.keys()))
         default = psets['webdav']
         items = dict(default.propertyItems())
-        self.assertTrue('displayname' in items.keys())
-        self.assertEquals(items['displayname'], ptool.title)
+        self.assertTrue('displayname' in list(items.keys()))
+        self.assertEqual(items['displayname'], ptool.title)
 
 
 class TestDAVMetadata(PloneTestCase.FunctionalTestCase):

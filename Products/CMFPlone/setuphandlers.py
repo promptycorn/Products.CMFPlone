@@ -2,16 +2,20 @@
 CMFPlone setup handlers.
 """
 
+import sys
+
 from borg.localrole.utils import replace_local_role_manager
+from plone.i18n.interfaces import ILanguageSchema
 from plone.i18n.normalizer.interfaces import IURLNormalizer
 from plone.portlets.interfaces import ILocalPortletAssignmentManager
 from plone.portlets.interfaces import IPortletManager
+from plone.registry.interfaces import IRegistry
 
 from zope.component import queryMultiAdapter
 from zope.component import queryUtility
 from zope.i18n.interfaces import ITranslationDomain
 from zope.i18n.locales import locales
-from zope.interface import implements
+from zope.interface import implementer
 
 from Acquisition import aq_base
 from Products.CMFCore.utils import getToolByName
@@ -28,8 +32,8 @@ from Products.CMFPlone.interfaces import IMigrationTool
 from Products.CMFPlone.Portal import member_indexhtml
 
 
+@implementer(INonInstallable)
 class HiddenProducts(object):
-    implements(INonInstallable)
 
     def getNonInstallableProducts(self):
         return [
@@ -120,7 +124,7 @@ def setupPortalContent(p):
     """
     Import default plone content
     """
-    existing = p.keys()
+    existing = list(p.keys())
     wftool = getToolByName(p, "portal_workflow")
 
     language = p.Language()
@@ -140,10 +144,19 @@ def setupPortalContent(p):
     pprop = getToolByName(p, "portal_properties")
     sheet = pprop.site_properties
 
-    tool.manage_setLanguageSettings(language,
-        [language],
-        setUseCombinedLanguageCodes=use_combined,
-        startNeutral=False)
+    if hasattr(tool, 'manage_setLanguageSettings'):
+        tool.manage_setLanguageSettings(language,
+            [language],
+            setUseCombinedLanguageCodes=use_combined,
+            startNeutral=False)
+    else:
+        registry = queryUtility(IRegistry)
+        if registry is not None:
+            if 'plone.default_language' not in registry:
+                registry.registerInterface(ILanguageSchema, prefix='plone')
+            registry['plone.default_language'] = language
+            registry['plone.available_languages'] = [language]
+            registry['plone.use_combined_language_codes'] = use_combined
 
     # Set the first day of the week, defaulting to Sunday, as the
     # locale data doesn't provide a value for English. European
@@ -151,7 +164,7 @@ def setupPortalContent(p):
     calendar = getToolByName(p, "portal_calendar", None)
     if calendar is not None:
         first = 6
-        gregorian = locale.dates.calendars.get(u'gregorian', None)
+        gregorian = locale.dates.calendars.get('gregorian', None)
         if gregorian is not None:
             first = gregorian.week.get('firstDay', None)
             # on the locale object we have: mon : 1 ... sun : 7
@@ -180,30 +193,31 @@ def setupPortalContent(p):
     request = getattr(p, 'REQUEST', None)
     # The front-page
     if 'front-page' not in existing:
-        front_title = u'Welcome to Plone'
-        front_desc = u'Congratulations! You have successfully installed Plone.'
+        front_title = 'Welcome to Plone'
+        front_desc = 'Congratulations! You have successfully installed Plone.'
         front_text = None
         _createObjectByType('Document', p, id='front-page',
                             title=front_title, description=front_desc)
         fp = p['front-page']
-        if wftool.getInfoFor(fp, 'review_state') != 'published':
+        if (wftool.getWorkflowsFor(fp) and
+                wftool.getInfoFor(fp, 'review_state', None) != 'published'):
             wftool.doActionFor(fp, 'publish')
 
         if base_language != 'en':
             util = queryUtility(ITranslationDomain, 'plonefrontpage')
             if util is not None:
                 front_title = util.translate(
-                                    u'front-title',
+                                    'front-title',
                                     target_language=target_language,
                                     default="Welcome to Plone")
                 front_desc = util.translate(
-                    u'front-description',
+                    'front-description',
                     target_language=target_language,
                     default="Congratulations! You have successfully installed "
                             "Plone.")
-                translated_text = util.translate(u'front-text',
+                translated_text = util.translate('front-text',
                                    target_language=target_language)
-                if translated_text != u'front-text':
+                if translated_text != 'front-text':
                     front_text = translated_text
 
         if front_text is None and request is not None:
@@ -234,10 +248,10 @@ def setupPortalContent(p):
         if base_language != 'en':
             util = queryUtility(ITranslationDomain, 'plonefrontpage')
             if util is not None:
-                news_title = util.translate(u'news-title',
+                news_title = util.translate('news-title',
                                        target_language=target_language,
                                        default='News')
-                news_desc = util.translate(u'news-description',
+                news_desc = util.translate('news-description',
                                       target_language=target_language,
                                       default='Site News')
 
@@ -254,7 +268,8 @@ def setupPortalContent(p):
         folder.unmarkCreationFlag()
         folder.setLanguage(language)
 
-        if wftool.getInfoFor(folder, 'review_state') != 'published':
+        if (wftool.getWorkflowsFor(folder) and
+                wftool.getInfoFor(folder, 'review_state', None) != 'published'):
             wftool.doActionFor(folder, 'publish')
 
         topic = p.news.aggregator
@@ -273,7 +288,8 @@ def setupPortalContent(p):
         topic.setLayout('folder_summary_view')
         topic.unmarkCreationFlag()
 
-        if wftool.getInfoFor(topic, 'review_state') != 'published':
+        if (wftool.getWorkflowsFor(topic) and
+                wftool.getInfoFor(topic, 'review_state', None) != 'published'):
             wftool.doActionFor(topic, 'publish')
 
     # Events topic
@@ -283,10 +299,10 @@ def setupPortalContent(p):
         if base_language != 'en':
             util = queryUtility(ITranslationDomain, 'plonefrontpage')
             if util is not None:
-                events_title = util.translate(u'events-title',
+                events_title = util.translate('events-title',
                                        target_language=target_language,
                                        default='Events')
-                events_desc = util.translate(u'events-description',
+                events_desc = util.translate('events-description',
                                       target_language=target_language,
                                       default='Site Events')
 
@@ -302,7 +318,8 @@ def setupPortalContent(p):
         folder.unmarkCreationFlag()
         folder.setLanguage(language)
 
-        if wftool.getInfoFor(folder, 'review_state') != 'published':
+        if (wftool.getWorkflowsFor(folder) and
+                wftool.getInfoFor(folder, 'review_state', None) != 'published'):
             wftool.doActionFor(folder, 'publish')
 
         topic = folder.aggregator
@@ -323,7 +340,8 @@ def setupPortalContent(p):
     else:
         topic = p.events
 
-    if wftool.getInfoFor(topic, 'review_state') != 'published':
+    if (wftool.getWorkflowsFor(topic) and
+            wftool.getInfoFor(topic, 'review_state', None) != 'published'):
         wftool.doActionFor(topic, 'publish')
 
     # configure Members folder
@@ -333,14 +351,14 @@ def setupPortalContent(p):
         _createObjectByType('Folder', p, id='Members',
                             title=members_title, description=members_desc)
 
-    if 'Members' in p.keys():
+    if 'Members' in list(p.keys()):
         if base_language != 'en':
             util = queryUtility(ITranslationDomain, 'plonefrontpage')
             if util is not None:
-                members_title = util.translate(u'members-title',
+                members_title = util.translate('members-title',
                                        target_language=target_language,
                                        default='Users')
-                members_desc = util.translate(u'members-description',
+                members_desc = util.translate('members-description',
                                       target_language=target_language,
                                       default="Site Users")
 
@@ -351,7 +369,8 @@ def setupPortalContent(p):
         members.setLanguage(language)
         members.reindexObject()
 
-        if wftool.getInfoFor(members, 'review_state') != 'published':
+        if (wftool.getWorkflowsFor(members) and
+                wftool.getInfoFor(members, 'review_state', None) != 'published'):
             wftool.doActionFor(members, 'publish')
 
         # add index_html to Members area
@@ -386,7 +405,11 @@ def setProfileVersion(portal):
     """
     Set profile version.
     """
-    mt = queryUtility(IMigrationTool)
+    mt = getToolByName(portal, 'portal_migration', None)
+    if mt is None:
+        mt = queryUtility(IMigrationTool)
+    if mt is None:
+        return
     mt.setInstanceVersion(mt.getFileSystemVersion())
     setup = getToolByName(portal, 'portal_setup')
     version = setup.getVersionForProfile(_DEFAULT_PROFILE)
@@ -439,10 +462,31 @@ def assignTitles(portal):
      'translation_service': 'Provides access to the translation machinery',
      'uid_catalog': 'Catalog of unique content identifiers',
      }
-    for oid, obj in portal.items():
+    for oid, obj in list(portal.items()):
         title = titles.get(oid, None)
         if title:
             setattr(aq_base(obj), 'title', title)
+
+
+def external_editor_permissions(site):
+    """Set ExternalEditor permissions only where the product exists."""
+    if sys.version_info[0] < 3:
+        site.manage_permission(
+            'Use external editor',
+            ['Authenticated', 'Manager', 'Site Administrator'],
+            False)
+
+
+def set_zsqlmethods_permissions(site):
+    """Set ZSQLMethods permissions only when the product is importable."""
+    try:
+        import Products.ZSQLMethods  # noqa
+    except ImportError:
+        return
+    site.manage_permission(
+        'Use Database Methods',
+        ['Site Administrator'],
+        False)
 
 
 def importFinalSteps(context):
@@ -478,6 +522,8 @@ def importFinalSteps(context):
     replace_local_role_manager(site)
     addCacheHandlers(site)
     addCacheForResourceRegistry(site)
+    external_editor_permissions(site)
+    set_zsqlmethods_permissions(site)
 
 
 def importContent(context):

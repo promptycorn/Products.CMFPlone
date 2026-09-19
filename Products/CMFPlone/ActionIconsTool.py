@@ -2,7 +2,7 @@ from Products.CMFActionIcons.ActionIconsTool import ActionIconsTool as BaseTool
 from Products.CMFActionIcons.permissions import View
 from Products.CMFCore.utils import getToolByName
 from AccessControl import ClassSecurityInfo
-from App.class_init import InitializeClass
+from AccessControl.class_init import InitializeClass
 from Products.CMFPlone.PloneBaseTool import PloneBaseTool
 from Products.CMFPlone.PloneTool import _icons as iconcache
 from Products.CMFPlone.log import log_deprecated
@@ -16,7 +16,7 @@ WHITELISTED_AI = set([
 
 
 def removeAICacheEntry(category, id):
-    if (category, id) in iconcache.keys():
+    if (category, id) in list(iconcache.keys()):
         del iconcache[(category, id)]
 
 

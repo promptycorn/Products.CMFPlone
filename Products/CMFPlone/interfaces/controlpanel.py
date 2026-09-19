@@ -1,4 +1,6 @@
-from basetool import IPloneBaseTool
+from .basetool import IPloneBaseTool
+from zope import schema
+from zope.interface import Interface
 
 
 class IControlPanel(IPloneBaseTool):
@@ -24,3 +26,17 @@ class IControlPanel(IPloneBaseTool):
     def enumConfiglets(group=None):
         """ lists the Configlets of a group, returns them as dicts by
             calling .getAction() on each of them """
+
+
+class ISiteSchema(Interface):
+    """BBB subset used by newer Plone support packages in the Py3 stage."""
+
+    no_thumbs_portlet = schema.Bool(
+        title=u'Suppress thumbs in portlets',
+        required=False,
+        default=False)
+
+    thumb_scale_portlet = schema.TextLine(
+        title=u'Portlet thumb scale',
+        required=False,
+        default=u'tile')

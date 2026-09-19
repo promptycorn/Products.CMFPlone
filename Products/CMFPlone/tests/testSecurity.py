@@ -1,10 +1,10 @@
 import re
 import unittest
-import urlparse
-from urllib import urlencode
+import urllib.parse
+from urllib.parse import urlencode
 from Testing.makerequest import makerequest
 from Products.PloneTestCase import PloneTestCase as ptc
-from Products.Five.testbrowser import Browser
+from Testing.testbrowser import Browser
 from zExceptions import Unauthorized
 
 ptc.setupPloneSite()
@@ -187,7 +187,7 @@ class TestAttackVectorsFunctional(ptc.FunctionalTestCase):
         self.setRoles(['Manager', 'Owner'])
         self.portal.REQUEST.PARENTS = [self.app]
         res = self.portal.news.manage_FTPlist(self.portal.REQUEST)
-        self.assertTrue(isinstance(res, basestring))
+        self.assertTrue(isinstance(res, str))
         self.portal.portal_workflow.doActionFor(self.portal.news, 'hide')
         self.setRoles(['Member'])
         from zExceptions import Unauthorized
@@ -227,7 +227,7 @@ class TestAttackVectorsFunctional(ptc.FunctionalTestCase):
     def test_createObject(self):
         res = self.publish('/plone/createObject?type_name=File&id=${foo}')
         self.assertEqual(302, res.status)
-        loc = urlparse.urlsplit(res.headers['location'])
+        loc = urllib.parse.urlsplit(res.headers['location'])
         # http://nohost/plone/portal_factory/File/${foo}/edit?_authenticator=..
         self.assertEqual(loc.scheme, 'http')
         self.assertEqual(loc.netloc, 'nohost')

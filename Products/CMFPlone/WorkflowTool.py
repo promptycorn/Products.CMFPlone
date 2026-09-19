@@ -1,4 +1,5 @@
 from zope.component import getMultiAdapter
+from zope.interface.interfaces import ComponentLookupError
 
 from Products.CMFCore.utils import getToolByName
 from Products.CMFCore.WorkflowTool import WorkflowTool as BaseTool
@@ -6,7 +7,7 @@ from Products.CMFPlone.interfaces import IWorkflowChain
 from ZODB.POSException import ConflictError
 from Acquisition import aq_base
 
-from App.class_init import InitializeClass
+from AccessControl.class_init import InitializeClass
 from AccessControl import getSecurityManager, ClassSecurityInfo
 from Products.CMFCore.permissions import ManagePortal
 from Products.DCWorkflow.Transitions import TRIGGER_USER_ACTION
@@ -114,7 +115,7 @@ class WorkflowTool(PloneBaseTool, BaseTool):
         in_use.append(self._default_chain)
 
         if self._chains_by_type:
-            for chain in self._chains_by_type.values():
+            for chain in list(self._chains_by_type.values()):
                 in_use.append(chain)
 
         return tuple(in_use[:])
@@ -164,7 +165,7 @@ class WorkflowTool(PloneBaseTool, BaseTool):
                     # Make the var_matches a dict instead of PersistentMapping
                     # to enable access from scripts
                     var_matches = {}
-                    for key in wlist_def.var_matches.keys():
+                    for key in list(wlist_def.var_matches.keys()):
                         var_matches[key] = wlist_def.var_matches[key]
 
                     a_wlist = {
@@ -241,7 +242,7 @@ class WorkflowTool(PloneBaseTool, BaseTool):
                             if absurl:
                                 objects_by_path[absurl] = (o.modified(), o)
 
-        results = objects_by_path.values()
+        results = list(objects_by_path.values())
         results.sort()
         return tuple([obj[1] for obj in results])
 
@@ -261,7 +262,7 @@ class WorkflowTool(PloneBaseTool, BaseTool):
     security.declareProtected(ManagePortal, 'listWorkflows')
     def listWorkflows(self):
         # Return the list of workflows.
-        return self.keys()
+        return list(self.keys())
 
     security.declarePublic('getTitleForStateOnType')
     def getTitleForStateOnType(self, state_name, p_type):
@@ -301,13 +302,13 @@ class WorkflowTool(PloneBaseTool, BaseTool):
         # out states with matching title and id.
         states = []
         dup_list = {}
-        for wf in self.values():
+        for wf in list(self.values()):
             state_folder = getattr(wf, 'states', None)
             if state_folder is not None:
                 if not filter_similar:
-                    states.extend(state_folder.values())
+                    states.extend(list(state_folder.values()))
                 else:
-                    for state in state_folder.values():
+                    for state in list(state_folder.values()):
                         key = '%s:%s' % (state.id, state.title)
                         if not key in dup_list:
                             states.append(state)
@@ -319,7 +320,11 @@ class WorkflowTool(PloneBaseTool, BaseTool):
         # Returns the chain that applies to the given object.
         # If we get a string as the ob parameter, use it as
         # the portal_type.
-        return getMultiAdapter((ob, self), IWorkflowChain)
+        try:
+            return getMultiAdapter((ob, self), IWorkflowChain)
+        except ComponentLookupError:
+            from Products.CMFPlone.workflow import ToolWorkflowChain
+            return ToolWorkflowChain(ob, self)
 
     security.declarePrivate('listActions')
     def listActions(self, info=None, object=None):

@@ -5,7 +5,7 @@
 from Products.CMFPlone.exportimport.tests.base import BodyAdapterTestCase
 
 from five.localsitemanager import make_objectmanager_site
-from zope.site.hooks import setHooks, setSite
+from zope.component.hooks import setHooks, setSite
 from zope.component import getSiteManager
 
 from OFS.Folder import Folder

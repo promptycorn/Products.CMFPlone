@@ -296,6 +296,9 @@ class IPlone(Interface):
     def have_portlets(manager_name, view=None):
         """Determine whether a column should be shown."""
 
+    def renderBase():
+        """Returns the current URL to be used in the base tag."""
+
     def mark_view(view):
         """ Adds a marker interface to the view if it is "the" view for the context
             May only be called from a template.

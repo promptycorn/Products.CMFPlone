@@ -15,7 +15,7 @@ stylesheets = portal_css.getEvaluatedResources(context)
 for stylesheet in stylesheets:
     if stylesheet.getRendering() in ['import', 'inline', 'link']:
         try:
-            print portal_css.getInlineResource(stylesheet.getId(), context)
+            print(portal_css.getInlineResource(stylesheet.getId(), context))
         except NotFound:
             pass
 

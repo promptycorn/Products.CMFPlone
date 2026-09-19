@@ -28,7 +28,7 @@ if qs:
                 k, v = tmp[0], ''
             L.append((k, v))
 else:
-    for k, v in kw.items():
+    for k, v in list(kw.items()):
         L.append((k, url_quote_plus(v)))
 
 # separate k/v pairs with &amp; (dont blame me, see the RFC)

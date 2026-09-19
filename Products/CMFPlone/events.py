@@ -1,19 +1,24 @@
-from zope.interface import implements
-from zope.component.interfaces import ObjectEvent
+from zope.interface import implementer
+try:
+    from zope.component.interfaces import ObjectEvent
+except ImportError:
+    from zope.interface.interfaces import ObjectEvent
 
 from Products.CMFCore.utils import getToolByName
 
-from interfaces import ISiteManagerCreatedEvent
-from interfaces import IReorderedEvent
+from .interfaces import ISiteManagerCreatedEvent
+from .interfaces import IReorderedEvent
 
 
+@implementer(ISiteManagerCreatedEvent)
 class SiteManagerCreatedEvent(ObjectEvent):
+    pass
 
-    implements(ISiteManagerCreatedEvent)
 
 
+@implementer(IReorderedEvent)
 class ReorderedEvent(ObjectEvent):
-    implements(IReorderedEvent)
+    pass
 
 
 def profileImportedEventHandler(event):
@@ -31,6 +36,6 @@ def profileImportedEventHandler(event):
         # CMF-only site, or a test run.
         return
     installed_version = gs.getLastVersionForProfile(profile_id)
-    if installed_version == (u'latest',):
+    if installed_version == ('latest',):
         actual_version = qi.getLatestUpgradeStep(profile_id)
         gs.setLastVersionForProfile(profile_id, actual_version)

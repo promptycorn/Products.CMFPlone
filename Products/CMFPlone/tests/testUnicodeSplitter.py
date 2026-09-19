@@ -20,7 +20,7 @@ def _setlocale(*names):
         try:
             locale.setlocale(locale.LC_ALL, name)
             break
-        except locale.Error, e:
+        except locale.Error as e:
             pass
     else:
         raise e.__class__("Unsupported locale. These tests need at least one "
@@ -38,8 +38,8 @@ class TestSplitter(unittest.TestCase):
 
     def testProcessGerman(self):
         # German letters
-        input = [u"\xc4ffin foo"]
-        output = [u"\xc4ffin", u"foo"]
+        input = ["\xc4ffin foo"]
+        output = ["\xc4ffin", "foo"]
         output = [t.encode('utf-8') for t in output]
 
         self.assertEqual(self.process(input), output)
@@ -51,9 +51,9 @@ class TestSplitter(unittest.TestCase):
 
     def testProcessGreek(self):
         # Greek letters
-        input = [u'\u039d\u03af\u03ba\u03bf\u03c2 \u03a4\u03b6\u03ac\u03bd\u03bf\u03c2 foo']
-        output = [u'\u039d\u03af\u03ba\u03bf\u03c2',
-                  u'\u03a4\u03b6\u03ac\u03bd\u03bf\u03c2', u'foo']
+        input = ['\u039d\u03af\u03ba\u03bf\u03c2 \u03a4\u03b6\u03ac\u03bd\u03bf\u03c2 foo']
+        output = ['\u039d\u03af\u03ba\u03bf\u03c2',
+                  '\u03a4\u03b6\u03ac\u03bd\u03bf\u03c2', 'foo']
         output = [t.encode('utf-8') for t in output]
 
         self.assertEqual(self.process(input), output)
@@ -65,8 +65,8 @@ class TestSplitter(unittest.TestCase):
 
     def testProcessTurkish(self):
         # Turkish letters
-        input = [u"\xdc\u011f\xfcr foo"]
-        output = [u"\xdc\u011f\xfcr", u"foo"]
+        input = ["\xdc\u011f\xfcr foo"]
+        output = ["\xdc\u011f\xfcr", "foo"]
         output = [t.encode('utf-8') for t in output]
 
         self.assertEqual(self.process(input), output)
@@ -105,8 +105,8 @@ class TestCaseNormalizer(unittest.TestCase):
         self.process = self.normalizer.process
 
     def testNormalizeGerman(self):
-        input = [u"\xc4ffin"]
-        output = [u"\xe4ffin"]
+        input = ["\xc4ffin"]
+        output = ["\xe4ffin"]
         output = [t.encode('utf-8') for t in output]
 
         self.assertEqual(self.process(input), output)
@@ -217,23 +217,23 @@ class TestQuery(PloneTestCase.PloneTestCase):
     def testQueryByUnicode(self):
         self.doc1.SearchableText = '\303\204ffin'
         self.catalog.indexObject(self.doc1)
-        brains = self.catalog(SearchableText=u'\xc4ffin')
+        brains = self.catalog(SearchableText='\xc4ffin')
         self.assertEqual(len(brains), 1)
 
     def testQueryByUnicodeLower(self):
         self.doc1.SearchableText = '\303\204ffin'
         self.catalog.indexObject(self.doc1)
-        brains = self.catalog(SearchableText=u'\xe4ffin')
+        brains = self.catalog(SearchableText='\xe4ffin')
         self.assertEqual(len(brains), 1)
 
     def testIndexUnicode(self):
-        self.doc1.SearchableText = u'\xc4ffin'
+        self.doc1.SearchableText = '\xc4ffin'
         self.catalog.indexObject(self.doc1)
         brains = self.catalog(SearchableText='\303\204ffin')
         self.assertEqual(len(brains), 1)
 
     def testIndexUnicodeLower(self):
-        self.doc1.SearchableText = u'\xc4ffin'
+        self.doc1.SearchableText = '\xc4ffin'
         self.catalog.indexObject(self.doc1)
         brains = self.catalog(SearchableText='\303\244ffin')
         self.assertEqual(len(brains), 1)
@@ -260,11 +260,11 @@ class TestBigramFunctions(unittest.TestCase):
 
     def test_process_unicode(self):
         lsts = [
-            (u"日本", [u"日本", u"本"]),
-            (u"日", [u"日"]),
-            (u"日本語", [u"日本", u"本語", u"語"]),
-            (u"日本語python", [u"日本", u"本語", u"語", u"python"]),
-            (u"日本語12345", [u"日本", u"本語", u"語", u"12345"]),
+            ("日本", ["日本", "本"]),
+            ("日", ["日"]),
+            ("日本語", ["日本", "本語", "語"]),
+            ("日本語python", ["日本", "本語", "語", "python"]),
+            ("日本語12345", ["日本", "本語", "語", "12345"]),
             ]
         for lst, rst in lsts:
             self.assertEqual(rst, list(process_unicode(lst)))
@@ -285,10 +285,10 @@ class TestBigramFunctions(unittest.TestCase):
 
     def test_process_unicode_glob(self):
         lsts = [
-            (u"日本", [u"日本"]),
-            (u"日", [u"日*"]),
-            (u"日本語", [u"日本", u"本語"]),
-            (u"日本語python", [u"日本", u"本語", u"語", u"python"]),
+            ("日本", ["日本"]),
+            ("日", ["日*"]),
+            ("日本語", ["日本", "本語"]),
+            ("日本語python", ["日本", "本語", "語", "python"]),
             ]
         for lst, rst in lsts:
             self.assertEqual(rst, list(process_unicode_glob(lst)))
@@ -330,7 +330,7 @@ class TestSearchingJapanese(PloneTestCase.PloneTestCase):
         self.assertEqual(len(items14), 1)
         items15 = catalog(SearchableText="予想*")
         self.assertEqual(len(items15), 1)
-        items16 = catalog(SearchableText=u"予想")
+        items16 = catalog(SearchableText="予想")
         self.assertEqual(len(items16), 1)
         self.portal.manage_delObjects(['doc1'])
         items2 = catalog(SearchableText="予想")
@@ -343,24 +343,24 @@ class TestSearchingUnicodeJapanese(PloneTestCase.PloneTestCase):
         self.setRoles(('Manager',))
         self.portal.invokeFactory('Document', 'doc1')
         self.doc1 = getattr(self.portal, 'doc1')
-        self.doc1.setTitle(u"Ploneは素晴らしい。")
-        self.doc1.setText(u"このページは予想している通り、テストです。 Pages Testing.")
+        self.doc1.setTitle("Ploneは素晴らしい。")
+        self.doc1.setText("このページは予想している通り、テストです。 Pages Testing.")
         self.doc1.reindexObject()
 
     def testSearch(self):
         catalog = getToolByName(self.portal, 'portal_catalog')
-        items1 = catalog(SearchableText=u"予想")
+        items1 = catalog(SearchableText="予想")
         self.assertEqual(len(items1), 1)
-        items12 = catalog(SearchableText=u"素晴らしい")
+        items12 = catalog(SearchableText="素晴らしい")
         self.assertEqual(len(items12), 1)
-        items13 = catalog(SearchableText=u"Pages")
+        items13 = catalog(SearchableText="Pages")
         self.assertEqual(len(items13), 1)
-        items14 = catalog(SearchableText=u"ページ")
+        items14 = catalog(SearchableText="ページ")
         self.assertEqual(len(items14), 1)
-        items15 = catalog(SearchableText=u"予想*")
+        items15 = catalog(SearchableText="予想*")
         self.assertEqual(len(items15), 1)
         items16 = catalog(SearchableText="予想")
         self.assertEqual(len(items16), 1)
         self.portal.manage_delObjects(['doc1'])
-        items2 = catalog(SearchableText=u"予想")
+        items2 = catalog(SearchableText="予想")
         self.assertEqual(len(items2), 0)

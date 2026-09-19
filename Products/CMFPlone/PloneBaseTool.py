@@ -1,4 +1,4 @@
-from App.class_init import InitializeClass
+from AccessControl.class_init import InitializeClass
 from AccessControl import ClassSecurityInfo
 from Products.CMFPlone.interfaces import IPloneBaseTool
 from Acquisition import aq_base
@@ -8,7 +8,7 @@ from Acquisition import aq_inner
 from Products.CMFCore import Expression
 from Products.CMFCore.utils import getToolByName
 
-from zope.interface import implements
+from zope.interface import implementer
 from zope.component import getMultiAdapter
 
 TempFolderClass = None
@@ -140,13 +140,13 @@ def getExprContext(context, object=None):
     return ec
 
 
+@implementer(IPloneBaseTool)
 class PloneBaseTool:
     """Base class of all tools used in CMFPlone and Plone Core
     """
 
     security = ClassSecurityInfo()
 
-    implements(IPloneBaseTool)
 
     # overwrite getOAI and getExprContext to use our variants that understand
     # the temp folder of portal factory

@@ -3,11 +3,11 @@ This tool requires a translation service which supports
 the translate method and the default parameter.
 """
 from zope.i18n import translate
-from zope.interface import implements
+from zope.interface import implementer
 from zope.publisher.interfaces.browser import IBrowserRequest
 
 from AccessControl import ClassSecurityInfo
-from App.class_init import InitializeClass
+from AccessControl.class_init import InitializeClass
 from Acquisition import aq_get
 from OFS.SimpleItem import SimpleItem
 from Products.CMFCore.utils import getToolByName
@@ -16,13 +16,14 @@ from Products.CMFPlone import PloneLocalesMessageFactory as PLMF
 from Products.CMFPlone.interfaces import ITranslationServiceTool
 from Products.CMFPlone.PloneBaseTool import PloneBaseTool
 
-from i18nl10n import ulocalized_time, \
+from .i18nl10n import ulocalized_time, \
                      monthname_msgid, monthname_msgid_abbr, \
                      weekdayname_msgid, weekdayname_msgid_abbr, \
                      weekdayname_msgid_short, \
                      monthname_english, weekdayname_english
 
 
+@implementer(ITranslationServiceTool)
 class TranslationServiceTool(PloneBaseTool, UniqueObject, SimpleItem):
     """ Utility methods to access the translation machinery """
 
@@ -30,7 +31,6 @@ class TranslationServiceTool(PloneBaseTool, UniqueObject, SimpleItem):
     meta_type = 'Portal Translation Service Tool'
     toolicon = 'skins/plone_images/site_icon.png'
     security = ClassSecurityInfo()
-    implements(ITranslationServiceTool)
 
     security.declarePublic('utranslate')
     def utranslate(self, *args, **kw):
@@ -55,10 +55,10 @@ class TranslationServiceTool(PloneBaseTool, UniqueObject, SimpleItem):
         # output_encoding
 
         # check if input is not type unicode
-        if not isinstance(m, unicode):
+        if not isinstance(m, str):
             if input_encoding is None:
                 input_encoding = 'utf-8'
-            m = unicode(str(m), input_encoding, errors)
+            m = str(str(m), input_encoding, errors)
 
         if output_encoding is None:
             output_encoding = 'utf-8'
@@ -70,14 +70,14 @@ class TranslationServiceTool(PloneBaseTool, UniqueObject, SimpleItem):
     def asunicodetype(self, m, input_encoding=None, errors='strict'):
         # create type unicode from type string
 
-        if isinstance(m, unicode):
+        if isinstance(m, str):
             return m
 
         if input_encoding is None:
             input_encoding = 'utf-8'
 
         # return as type unicode
-        return unicode(str(m), input_encoding, errors)
+        return str(str(m), input_encoding, errors)
 
     security.declarePublic('ulocalized_time')
     def ulocalized_time(self, time, long_format=None, time_only=None,

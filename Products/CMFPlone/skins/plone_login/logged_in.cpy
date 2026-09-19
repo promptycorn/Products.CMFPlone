@@ -15,6 +15,22 @@ REQUEST = context.REQUEST
 
 membership_tool = getToolByName(context, 'portal_membership')
 if membership_tool.isAnonymousUser():
+    pas = getToolByName(context, 'acl_users')
+    login = REQUEST.get('__ac_name', '') or REQUEST.get('login_name', '')
+    password = REQUEST.get('__ac_password', '') or REQUEST.get('login_password', '')
+    source_users = getattr(pas, 'source_users', None)
+    if login and password and source_users is not None:
+        authenticated = source_users.authenticateCredentials({
+            'login': login,
+            'password': password,
+        })
+        if authenticated and authenticated[0]:
+            pas.updateCredentials(REQUEST, REQUEST.RESPONSE, login, password)
+            came_from = REQUEST.get('came_from', None)
+            if came_from and context.portal_url.isURLInPortal(came_from):
+                return REQUEST.RESPONSE.redirect(came_from)
+            return REQUEST.RESPONSE.redirect(context.absolute_url())
+
     REQUEST.RESPONSE.expireCookie('__ac', path='/')
     email_login = getToolByName(context, 'portal_properties') \
                     .site_properties.getProperty('use_email_as_login')

@@ -4,7 +4,7 @@
 ##bind namespace=
 ##bind script=script
 ##bind subpath=traverse_subpath
-##parameters=q,limit=10,path=None,sortOn=None
+##parameters=q='',limit=10,path=None,sortOn=None
 ##title=Determine whether to show an id in an edit form
 
 from Products.CMFCore.utils import getToolByName
@@ -61,12 +61,16 @@ def quote_bad_chars(s):
 # But we strip these and these so that the catalog does
 # not interpret them as metachars
 # See http://dev.plone.org/plone/ticket/9422 for an explanation of '\u3000'
-multispace = u'\u3000'.encode('utf-8')
+q = safe_unicode(q or '')
+multispace = '\u3000'
 for char in ('?', '-', '+', '*', multispace):
     q = q.replace(char, ' ')
-r = q.split()
-r = " AND ".join(r)
-r = quote_bad_chars(r) + '*'
+words = q.split()
+if words:
+    r = " AND ".join(words)
+    r = quote_bad_chars(r) + '*'
+else:
+    r = ''
 searchterms = url_quote_plus(r)
 
 REQUEST = context.REQUEST
@@ -87,8 +91,11 @@ if path is None:
 else:
     params['path'] = path
 
-# search limit+1 results to know if limit is exceeded
-results = catalog(REQUEST, **params)
+if r:
+    # search limit+1 results to know if limit is exceeded
+    results = catalog(REQUEST, **params)
+else:
+    results = []
 
 searchterm_query = '?searchterm=%s' % url_quote_plus(q)
 

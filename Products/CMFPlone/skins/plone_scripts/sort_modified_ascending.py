@@ -8,5 +8,5 @@
 ##title=
 
 sorted = catalog_sequence[:]
-sorted.sort(lambda x, y: cmp(x.modified(), y.modified()))
+sorted.sort(key=lambda x: x.modified())
 return sorted

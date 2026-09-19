@@ -9,7 +9,11 @@ from plone.app.layout.navigation.navtree import buildFolderTree
 from plone.app.layout.navigation.root import getNavigationRoot
 
 from zope.interface import directlyProvides
-from zope.interface import implements
+try:
+    from zope.interface import implements
+except ImportError:
+    def implements(*interfaces):
+        return None
 
 default_user = PloneTestCase.default_user
 

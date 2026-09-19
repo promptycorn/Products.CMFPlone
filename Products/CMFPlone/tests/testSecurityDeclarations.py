@@ -24,7 +24,7 @@ class RestrictedPythonTest(ZopeTestCase.ZopeTestCase):
         self.addPS('ps', body=psbody)
         try:
             self.folder.ps()
-        except (ImportError, Unauthorized), e:
+        except (ImportError, Unauthorized) as e:
             self.fail(e)
 
     def checkUnauthorized(self, psbody):
@@ -179,7 +179,7 @@ from ZODB.POSException import ConflictError
 try: raise ConflictError
 except ConflictError: pass
 ''')
-        except Exception, e:
+        except Exception as e:
             self.fail('Failed to catch: %s %s (module %s)' %
                       (e.__class__.__name__, e, e.__module__))
 
@@ -192,7 +192,7 @@ from ZODB.POSException import ConflictError
 try: context.raiseConflictError()
 except ConflictError: pass
 ''')
-        except Exception, e:
+        except Exception as e:
             self.fail('Failed to catch: %s %s (module %s)' %
                       (e.__class__.__name__, e, e.__module__))
 
@@ -211,7 +211,7 @@ from Products.ZCTextIndex.ParseTree import ParseError
 try: context.raiseParseError()
 except ParseError: pass
 ''')
-        except Exception, e:
+        except Exception as e:
             self.fail('Failed to catch: %s %s (module %s)' %
                       (e.__class__.__name__, e, e.__module__))
 
@@ -233,7 +233,7 @@ from DateTime.interfaces import DateTimeError
 try: context.raiseDateTimeError()
 except DateTimeError: pass
 ''')
-        except Exception, e:
+        except Exception as e:
             self.fail('Failed to catch: %s %s (module %s)' %
                       (e.__class__.__name__, e, e.__module__))
 
@@ -255,7 +255,7 @@ from DateTime.interfaces import SyntaxError
 try: context.raiseSyntaxError()
 except SyntaxError: pass
 ''')
-        except Exception, e:
+        except Exception as e:
             self.fail('Failed to catch: %s %s (module %s)' %
                       (e.__class__.__name__, e, e.__module__))
 
@@ -274,7 +274,7 @@ from OFS.CopySupport import CopyError
 try: context.raiseCopyError()
 except CopyError: pass
 ''')
-        except Exception, e:
+        except Exception as e:
             self.fail('Failed to catch: %s %s (module %s)' %
                       (e.__class__.__name__, e, e.__module__))
 
@@ -296,7 +296,7 @@ from Products.CMFDefault.DiscussionTool import DiscussionNotAllowed
 try: context.raiseDiscussionNotAllowed()
 except DiscussionNotAllowed: pass
 ''')
-        except Exception, e:
+        except Exception as e:
             self.fail('Failed to catch: %s %s (module %s)' %
                       (e.__class__.__name__, e, e.__module__))
 

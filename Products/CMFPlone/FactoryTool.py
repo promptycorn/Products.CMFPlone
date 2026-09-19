@@ -1,16 +1,21 @@
 import logging
 import os
 
-from zope.interface import implements
+from zope.interface import implementer
 from zope.structuredtext import stx2html
 
 from AccessControl import Owned, ClassSecurityInfo, getSecurityManager
+from AccessControl.owner import UnownableOwner
 from Acquisition import aq_parent, aq_base, aq_inner, aq_get
-from App.class_init import InitializeClass
+from AccessControl.class_init import InitializeClass
 from App.Common import package_home
 from OFS.SimpleItem import SimpleItem
 from zExceptions import NotFound
-from ZPublisher.Publish import call_object, missing_name, dont_publish_class
+from ZPublisher.WSGIPublisher import (
+    call_object,
+    missing_name,
+    dont_publish_class,
+)
 from ZPublisher.mapply import mapply
 from Products.CMFPlone import cmfplone_globals
 from Products.PageTemplates.PageTemplateFile import PageTemplateFile
@@ -75,12 +80,12 @@ def _createObjectByType(type_name, container, id, *args, **kw):
 # we can add all types to types_tool's allowed_content_types
 # for the class without having side effects in the rest of
 # the portal.
+@implementer(IHideFromBreadcrumbs)
 class TempFolder(TempFolderBase):
 
     portal_type = meta_type = 'TempFolder'
     isPrincipiaFolderish = 0
 
-    implements(IHideFromBreadcrumbs)
 
     # override getPhysicalPath so that temporary objects return a full path
     # that includes the acquisition parent of portal_factory (otherwise we get
@@ -112,7 +117,7 @@ class TempFolder(TempFolderBase):
                 if callable(lr):
                     lr = lr()
                 lr = lr or {}
-                for k, v in lr.items():
+                for k, v in list(lr.items()):
                     if not k in local_roles:
                         local_roles[k] = []
                     for role in v:
@@ -131,7 +136,7 @@ class TempFolder(TempFolderBase):
                 object = parent
                 continue
             if hasattr(object, 'im_self'):
-                object = object.im_self
+                object = object.__self__
                 object = getattr(object, 'aq_inner', object)
                 continue
             break
@@ -161,7 +166,7 @@ class TempFolder(TempFolderBase):
 
     def getOwner(self, info=0,
                  aq_get=aq_get,
-                 UnownableOwner=Owned.UnownableOwner,
+                 UnownableOwner=UnownableOwner,
                  getSecurityManager=getSecurityManager,
                  ):
         return aq_parent(
@@ -233,6 +238,7 @@ class TempFolder(TempFolderBase):
 
 
 # #############################################################################
+@implementer(IFactoryTool, IHideFromBreadcrumbs)
 class FactoryTool(PloneBaseTool, UniqueObject, SimpleItem):
     """ """
     id = 'portal_factory'
@@ -241,7 +247,6 @@ class FactoryTool(PloneBaseTool, UniqueObject, SimpleItem):
     security = ClassSecurityInfo()
     isPrincipiaFolderish = 0
 
-    implements(IFactoryTool, IHideFromBreadcrumbs)
 
     manage_options = (
         ({'label': 'Overview', 'action': 'manage_overview'},
@@ -325,8 +330,11 @@ class FactoryTool(PloneBaseTool, UniqueObject, SimpleItem):
             # TODO is this necessary?
             membership_tool = getToolByName(self, 'portal_membership')
             if not membership_tool.isAnonymousUser():
-                member = membership_tool.getAuthenticatedMember()
-                obj.changeOwnership(member.getUser(), 1)
+                user = getattr(self.REQUEST, 'AUTHENTICATED_USER', None)
+                if user is None:
+                    member = membership_tool.getAuthenticatedMember()
+                    user = member.getUser()
+                obj.changeOwnership(user, 1)
             if hasattr(aq_base(obj), 'manage_afterPortalFactoryCreate'):
                 obj.manage_afterPortalFactoryCreate()
         return obj

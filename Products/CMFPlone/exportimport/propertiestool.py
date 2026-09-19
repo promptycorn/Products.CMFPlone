@@ -31,8 +31,7 @@ def importPloneProperties(context):
 
     importer = queryMultiAdapter((ptool, context), IBody)
     if importer is None:
-        logger.warning('Import adapter missing.')
-        return
+        importer = PlonePropertiesToolXMLAdapter(ptool, context)
 
     importer.body = body
     logger.info('Properties tool imported.')
@@ -50,8 +49,7 @@ def exportPloneProperties(context):
     exporter = queryMultiAdapter((ptool, context), IBody)
     #IBody(ptool)
     if exporter is None:
-        logger.warning('Export adapter missing.')
-        return
+        exporter = PlonePropertiesToolXMLAdapter(ptool, context)
 
     context.writeDataFile(_FILENAME, exporter.body, exporter.mime_type)
     logger.info('Properties tool exported.')
@@ -145,5 +143,6 @@ class PlonePropertiesToolXMLAdapter(XMLAdapterBase, ObjectManagerHelpers):
 
             obj = getattr(self.context, obj_id)
             importer = queryMultiAdapter((obj, self.environ), INode)
-            if importer:
-                importer.node = child
+            if importer is None:
+                importer = SimpleItemWithPropertiesXMLAdapter(obj, self.environ)
+            importer.node = child

@@ -276,7 +276,7 @@ class TestCatalogIndexing(PloneTestCase.PloneTestCase):
         self.catalog.indexObject(self.folder.doc, idxs=['Title'])
         # The document is cataloged
         path = self.catalog._CatalogTool__url(self.folder.doc)
-        self.assertTrue(path in self.catalog._catalog.paths.values())
+        self.assertTrue(path in list(self.catalog._catalog.paths.values()))
         # But it is not returned when searching...
         self.assertEqual(len(self.catalog(getId='doc')), 0)
         self.assertEqual(len(self.catalog(Title='Foo')), 0)  # <-- Should be 1
@@ -291,7 +291,7 @@ class TestCatalogIndexing(PloneTestCase.PloneTestCase):
         self.catalog.indexObject(self.folder.doc, idxs=['getId'])
         # The document is cataloged
         path = self.catalog._CatalogTool__url(self.folder.doc)
-        self.assertTrue(path in self.catalog._catalog.paths.values())
+        self.assertTrue(path in list(self.catalog._catalog.paths.values()))
         # But it is not returned when searching...
         self.assertEqual(len(self.catalog(getId='doc')), 0)  # <-- Should be 1
         self.assertEqual(len(self.catalog(Title='Foo')), 0)
@@ -335,8 +335,8 @@ class TestCatalogIndexing(PloneTestCase.PloneTestCase):
         self.catalog.indexObject(self.folder.doc)
         self.folder.doc.setModificationDate(DateTime(0))
         self.catalog.clearFindAndRebuild()
-        self.assertEquals(self.folder.doc.modified(), DateTime(0))
-        self.assertEquals(len(self.catalog(modified=DateTime(0))), 1)
+        self.assertEqual(self.folder.doc.modified(), DateTime(0))
+        self.assertEqual(len(self.catalog(modified=DateTime(0))), 1)
 
 
 class TestCatalogSearching(PloneTestCase.PloneTestCase):
@@ -1074,7 +1074,7 @@ class TestIndexers(PloneTestCase.PloneTestCase):
     def test_getObjSize(self):
         from Products.CMFPlone.CatalogTool import getObjSize
         get_size = getObjSize.callable
-        self.doc.setText(u'a' * 1000)
+        self.doc.setText('a' * 1000)
         self.doc.reindexObject()
         self.assertEqual(get_size(self.doc), '1 KB')
 
@@ -1097,7 +1097,7 @@ class TestMetadata(PloneTestCase.PloneTestCase):
         doc = self.folder.doc
         catalog = self.portal.portal_catalog
         brain = catalog(UID=doc.UID())[0]
-        self.assertEquals(brain.location, doc.getLocation())
+        self.assertEqual(brain.location, doc.getLocation())
 
 
 class TestObjectProvidedIndexExtender(unittest.TestCase):

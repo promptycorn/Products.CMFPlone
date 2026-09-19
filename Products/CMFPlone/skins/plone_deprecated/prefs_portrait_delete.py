@@ -15,6 +15,6 @@ portal_membership = context.portal_membership
 member = portal_membership.getMemberById(userid)
 
 portal_membership.deletePersonalPortrait(userid)
-context.plone_utils.addPortalMessage(_(u'Portrait deleted.'))
+context.plone_utils.addPortalMessage(_('Portrait deleted.'))
 
 return REQUEST.RESPONSE.redirect(REQUEST.HTTP_REFERER)

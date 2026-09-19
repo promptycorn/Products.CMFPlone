@@ -27,6 +27,9 @@
      interface="Products.ATContentTypes.interface.IATCTTool"
      object="portal_atct"/>
   <utility
+     interface="Products.CMFCore.interfaces.ICatalogTool"
+     object="portal_catalog"/>
+  <utility
      interface="Products.CMFActionIcons.interfaces.IActionIconsTool"
      object="portal_actionicons"/>
   <utility
@@ -39,8 +42,17 @@
      interface="Products.CMFCore.interfaces.IPropertiesTool"
      object="portal_properties"/>
   <utility
+     interface="Products.CMFCore.interfaces.ISkinsTool"
+     object="portal_skins"/>
+  <utility
      interface="Products.CMFCore.interfaces.ISiteRoot"
      object=""/>
+  <utility
+     interface="Products.CMFCore.interfaces.ITypesTool"
+     object="portal_types"/>
+  <utility
+     interface="Products.CMFCore.interfaces.IWorkflowTool"
+     object="portal_workflow"/>
   <utility
      interface="Products.CMFCore.interfaces.IUndoTool"
      object="portal_undo"/>

@@ -41,7 +41,7 @@ class ProductsCMFPloneLayer(PloneSandboxLayer):
         portal.invokeFactory(
             "Folder",
             id="test-folder",
-            title=u"Test Folder"
+            title="Test Folder"
         )
 
     def tearDownPloneSite(self, portal):

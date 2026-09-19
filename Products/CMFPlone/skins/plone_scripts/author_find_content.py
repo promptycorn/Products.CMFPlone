@@ -37,7 +37,7 @@ for item in content:
 ## The end result is a dictionary of lists, where the keys are the actual
 ## portal types. This means they are in rather random order..
 
-types = found.keys()
+types = list(found.keys())
 types.sort()
 
 results = []

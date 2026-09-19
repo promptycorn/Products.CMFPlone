@@ -1,15 +1,15 @@
 import logging
 import sys
-from StringIO import StringIO
+from io import StringIO
 
 import pkg_resources
 import transaction
-from zope.interface import implements
+from zope.interface import implementer
 
 from AccessControl import ClassSecurityInfo
 from AccessControl.requestmethod import postonly
-from App.class_init import InitializeClass
-import Globals
+from AccessControl.class_init import InitializeClass
+from App.config import getConfiguration
 from OFS.SimpleItem import SimpleItem
 from ZODB.POSException import ConflictError
 
@@ -49,7 +49,7 @@ class Addon(object):
         self.check_module = check_module
 
     def __repr__(self):
-        return u'<{0} profile {1}>'.format(
+        return '<{0} profile {1}>'.format(
             self.__class__.__name__, self.profile_id)
 
     def safe(self):
@@ -90,25 +90,25 @@ class AddonList(list):
 # core packages that actually have upgrade steps.
 # Good start is portal_setup.listProfilesWithUpgrades()
 ADDON_LIST = AddonList([
-    Addon(profile_id=u'Products.CMFEditions:CMFEditions'),
-    Addon(profile_id=u'Products.CMFPlacefulWorkflow:CMFPlacefulWorkflow'),
-    Addon(profile_id=u'Products.TinyMCE:TinyMCE',
+    Addon(profile_id='Products.CMFEditions:CMFEditions'),
+    Addon(profile_id='Products.CMFPlacefulWorkflow:CMFPlacefulWorkflow'),
+    Addon(profile_id='Products.TinyMCE:TinyMCE',
         check_module='Products.TinyMCE.upgrades'),
-    Addon(profile_id=u'plone.app.dexterity:default'),
-    Addon(profile_id=u'plone.app.discussion:default'),
-    Addon(profile_id=u'plone.app.iterate:plone.app.iterate'),
-    Addon(profile_id=u'plone.app.jquery:default'),
-    Addon(profile_id=u'plone.app.jquerytools:default'),
-    Addon(profile_id=u'plone.app.querystring:default'),
-    Addon(profile_id=u'plone.app.theming:default'),
-    Addon(profile_id=u'plonetheme.sunburst:default'),
+    Addon(profile_id='plone.app.dexterity:default'),
+    Addon(profile_id='plone.app.discussion:default'),
+    Addon(profile_id='plone.app.iterate:plone.app.iterate'),
+    Addon(profile_id='plone.app.jquery:default'),
+    Addon(profile_id='plone.app.jquerytools:default'),
+    Addon(profile_id='plone.app.querystring:default'),
+    Addon(profile_id='plone.app.theming:default'),
+    Addon(profile_id='plonetheme.sunburst:default'),
     ])
 
 
+@implementer(IMigrationTool)
 class MigrationTool(PloneBaseTool, UniqueObject, SimpleItem):
     """Handles migrations between Plone releases"""
 
-    implements(IMigrationTool)
 
     id = 'portal_migration'
     meta_type = 'Plone Migration Tool'
@@ -183,14 +183,21 @@ class MigrationTool(PloneBaseTool, UniqueObject, SimpleItem):
         # Useful core information.
         vars = {}
         get_dist = pkg_resources.get_distribution
-        vars['Zope'] = get_dist('Zope2').version
+        try:
+            vars['Zope'] = get_dist('Zope').version
+        except pkg_resources.DistributionNotFound:
+            vars['Zope'] = get_dist('Zope2').version
+        try:
+            vars['Zope Compat'] = get_dist('Zope2').version
+        except pkg_resources.DistributionNotFound:
+            pass
         vars['Python'] = sys.version
         vars['Platform'] = sys.platform
         vars['Plone'] = get_dist('Products.CMFPlone').version
         vars['Plone Instance'] = self.getInstanceVersion()
         vars['Plone File System'] = self.getFileSystemVersion()
         vars['CMF'] = get_dist('Products.CMFCore').version
-        vars['Debug mode'] = Globals.DevelopmentMode and 'Yes' or 'No'
+        vars['Debug mode'] = getConfiguration().debug_mode and 'Yes' or 'No'
         try:
             vars['PIL'] = get_dist('PIL').version
         except pkg_resources.DistributionNotFound:
@@ -212,7 +219,7 @@ class MigrationTool(PloneBaseTool, UniqueObject, SimpleItem):
     security.declareProtected(ManagePortal, 'coreVersionsList')
     def coreVersionsList(self):
         # Useful core information.
-        res = self.coreVersions().items()
+        res = list(self.coreVersions().items())
         res.sort()
         return res
 

@@ -16,7 +16,7 @@ class TestDateComponentsSupport(PloneTestCase.PloneTestCase):
         self.d = self.portal.date_components_support(date)
 
     def testElements(self):
-        self.assertEqual(sortTuple(self.d.keys()),
+        self.assertEqual(sortTuple(list(self.d.keys())),
                 ('ampm', 'days', 'hours', 'minutes', 'months', 'years'))
 
     def testYears(self):
@@ -171,7 +171,7 @@ class TestDateComponentsSupportDefault(PloneTestCase.PloneTestCase):
         self.d = self.portal.date_components_support(None)
 
     def testElements(self):
-        self.assertEqual(sortTuple(self.d.keys()),
+        self.assertEqual(sortTuple(list(self.d.keys())),
                 ('ampm', 'days', 'hours', 'minutes', 'months', 'years'))
 
     def testYears(self):
@@ -322,7 +322,7 @@ class TestDateComponentsSupportAMPM(PloneTestCase.PloneTestCase):
         self.d = self.portal.date_components_support(date, use_ampm=1)
 
     def testElements(self):
-        self.assertEqual(sortTuple(self.d.keys()),
+        self.assertEqual(sortTuple(list(self.d.keys())),
                 ('ampm', 'days', 'hours', 'minutes', 'months', 'years'))
 
     def testHours(self):
@@ -378,7 +378,7 @@ class TestDateComponentsSupportAMPMDefault(PloneTestCase.PloneTestCase):
         self.d = self.portal.date_components_support(None, use_ampm=1)
 
     def testElements(self):
-        self.assertEqual(sortTuple(self.d.keys()),
+        self.assertEqual(sortTuple(list(self.d.keys())),
                 ('ampm', 'days', 'hours', 'minutes', 'months', 'years'))
 
     def testHours(self):

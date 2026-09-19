@@ -7,7 +7,11 @@
 import os
 
 from zope.interface import implementer
-from zope.interface import implements
+try:
+    from zope.interface import implements
+except ImportError:
+    def implements(*interfaces):
+        return None
 from zope.interface import Interface
 
 from Products.CMFPlone.interfaces import INonStructuralFolder
@@ -20,7 +24,7 @@ from ZPublisher.HTTPRequest import FileUpload
 
 
 TEXT = 'file data'
-UTEXT = u'file data'
+UTEXT = 'file data'
 GIF = open(os.path.join(os.path.dirname(__file__),
            os.pardir,
            'tool.gif')).read()

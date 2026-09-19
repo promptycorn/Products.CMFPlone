@@ -1,5 +1,5 @@
 from Acquisition import aq_inner
-from zope.interface import implements
+from zope.interface import implementer
 from zope.component import getMultiAdapter
 
 from Acquisition import aq_base
@@ -56,8 +56,8 @@ def get_view_url(context):
     return name, item_url
 
 
+@implementer(INavigationTree)
 class CatalogNavigationTree(BrowserView):
-    implements(INavigationTree)
 
     def navigationTreeRootPath(self):
         context = aq_inner(self.context)
@@ -103,8 +103,8 @@ class CatalogNavigationTree(BrowserView):
                                query=query, strategy=strategy)
 
 
+@implementer(ISiteMap)
 class CatalogSiteMap(BrowserView):
-    implements(ISiteMap)
 
     def siteMap(self):
         context = aq_inner(self.context)
@@ -118,8 +118,8 @@ class CatalogSiteMap(BrowserView):
                                query=query, strategy=strategy)
 
 
+@implementer(INavigationTabs)
 class CatalogNavigationTabs(BrowserView):
-    implements(INavigationTabs)
 
     def _getNavQuery(self):
         context = self.context
@@ -172,7 +172,7 @@ class CatalogNavigationTabs(BrowserView):
 
         if actions is None:
             context_state = getMultiAdapter((context, self.request),
-                                            name=u'plone_context_state')
+                                            name='plone_context_state')
             actions = context_state.actions(category)
 
         # Build result dict
@@ -213,8 +213,8 @@ class CatalogNavigationTabs(BrowserView):
         return result
 
 
+@implementer(INavigationBreadcrumbs)
 class CatalogNavigationBreadcrumbs(BrowserView):
-    implements(INavigationBreadcrumbs)
 
     def breadcrumbs(self):
         context = aq_inner(self.context)
@@ -255,8 +255,8 @@ class CatalogNavigationBreadcrumbs(BrowserView):
         return result
 
 
+@implementer(INavigationBreadcrumbs)
 class PhysicalNavigationBreadcrumbs(BrowserView):
-    implements(INavigationBreadcrumbs)
 
     def breadcrumbs(self):
         context = aq_inner(self.context)
@@ -294,8 +294,8 @@ class PhysicalNavigationBreadcrumbs(BrowserView):
         return base
 
 
+@implementer(INavigationBreadcrumbs)
 class RootPhysicalNavigationBreadcrumbs(BrowserView):
-    implements(INavigationBreadcrumbs)
 
     def breadcrumbs(self):
         # XXX Root never gets included, it's hardcoded as 'Home' in

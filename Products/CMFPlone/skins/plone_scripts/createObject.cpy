@@ -19,13 +19,26 @@ response.setHeader('Cache-Control', 'no-cache')
 
 authenticator = context.restrictedTraverse("@@authenticator")
 
+if type_name is None:
+    type_name = REQUEST.get('type_name', None)
+
+if type_name is None:
+    type_name = REQUEST.form.get('type_name', None)
+
+if type_name is None:
+    query_string = REQUEST.environ.get('QUERY_STRING', '')
+    for query_part in query_string.split('&'):
+        if query_part.startswith('type_name='):
+            type_name = query_part[len('type_name='):].replace('+', ' ')
+            break
+
+if type_name is None:
+    raise Exception('Type name not specified')
+
 if id is None:
     id = context.generateUniqueId(type_name)
 else:
     id = id.replace('$', '$$')
-
-if type_name is None:
-    raise Exception('Type name not specified')
 
 types_tool = getToolByName(context, 'portal_types')
 

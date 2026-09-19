@@ -1,6 +1,10 @@
 import unittest
 
-from zope.interface import implements
+try:
+    from zope.interface import implements
+except ImportError:
+    def implements(*interfaces):
+        return None
 
 from Products.CMFCore.interfaces import IDublinCore
 from Products.CMFCore.interfaces import IContentish

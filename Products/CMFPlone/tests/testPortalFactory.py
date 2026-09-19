@@ -1,4 +1,4 @@
-import urlparse
+import urllib.parse
 import os
 from Products.CMFPlone.tests import PloneTestCase
 
@@ -36,8 +36,8 @@ class TestPortalFactory(PloneTestCase.PloneTestCase):
     def testTraverseEditView(self):
         edit_view = self.folder.restrictedTraverse(
                         'portal_factory/Document/tmp_id/edit')
-        self.assertEquals('tmp_id', edit_view.im_self.getId())
-        self.assertEquals('Document', edit_view.im_self.portal_type)
+        self.assertEqual('tmp_id', edit_view.__self__.getId())
+        self.assertEqual('Document', edit_view.__self__.portal_type)
 
     def testTraverseTwiceByDifferentContentTypes(self):
         temp_doc = self.folder.restrictedTraverse(
@@ -240,7 +240,7 @@ class TestCreateObjectByURL(PloneTestCase.FunctionalTestCase):
         # CMFFormController redirects should not do alias translation.
         # Check the path instead of the entire location, to avoid getting the
         # csrf _authenticator query parameter.
-        self.assertTrue(urlparse.urlsplit(location).path.endswith('/edit'))
+        self.assertTrue(urllib.parse.urlsplit(location).path.endswith('/edit'))
 
         # Perform the redirect
         edit_form_path = location[len(self.app.REQUEST.SERVER_URL):]
@@ -262,7 +262,7 @@ class TestCreateObjectByURL(PloneTestCase.FunctionalTestCase):
         location = response.getHeader('Location')
         self.assertTrue(location.startswith(
                                 self.folder_url + '/portal_factory/Document/'))
-        self.assertTrue(urlparse.urlsplit(location).path.endswith('/edit'))
+        self.assertTrue(urllib.parse.urlsplit(location).path.endswith('/edit'))
 
         # Perform the redirect
         edit_form_path = location[len(self.app.REQUEST.SERVER_URL):]
@@ -277,7 +277,7 @@ class TestCreateObjectByURL(PloneTestCase.FunctionalTestCase):
         # We got redirected to the factory
         self.assertEqual(response.getStatus(), 302)
         newpath = response.getHeader('location')
-        proto, host, path, query, fragment = urlparse.urlsplit(newpath)
+        proto, host, path, query, fragment = urllib.parse.urlsplit(newpath)
         # Let's follow it
         response = self.publish(path)
         # And we are forbidden
@@ -342,7 +342,7 @@ class TestPortalFactoryTraverseByURL(PloneTestCase.FunctionalTestCase):
         # We got redirected to the factory
         self.assertEqual(response.getStatus(), 302)
         newpath = response.getHeader('location')
-        proto, host, path, query, fragment = urlparse.urlsplit(newpath)
+        proto, host, path, query, fragment = urllib.parse.urlsplit(newpath)
 
         self.tmp_obj_path = path.replace('/edit', '')
 

@@ -26,7 +26,7 @@ class Batch(QuantumBatch):
          'Use the `sequence_length` attribute for the size of the '
          'entire sequence. '))
 
-    def __nonzero__(self):
+    def __bool__(self):
         # Without __nonzero__ a bool(self) would call len(self), which
         # gives a deprecation warning.
         return bool(self.length)
@@ -49,8 +49,8 @@ class Batch(QuantumBatch):
             navlist = []
         if not navlist:
             navlist = self.navlist
-        return map(lambda x, formvariables=formvariables:
-                (x, self.pageurl(formvariables, x)), navlist)
+        return list(map(lambda x, formvariables=formvariables:
+                (x, self.pageurl(formvariables, x)), navlist))
 
     def prevurls(self, formvariables):
         # Helper method to get prev navigation list from templates.

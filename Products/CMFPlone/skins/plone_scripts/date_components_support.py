@@ -115,11 +115,11 @@ for x in range(1, 32):
     days.append(d)
 
 if use_ampm:
-    hours_range = [12] + range(1, 12)
+    hours_range = [12] + list(range(1, 12))
     hour_default = '12'
     hour = int(date.strftime('%I'))
 else:
-    hours_range = range(0, 24)
+    hours_range = list(range(0, 24))
     hour_default = '00'
     hour = int(date.strftime('%H'))
 

@@ -70,13 +70,13 @@ except ImportError:
 
 
 def setDefaultDateFormat(localeid, value):
-    gregorian = locales.getLocale(*localeid).dates.calendars[u'gregorian']
+    gregorian = locales.getLocale(*localeid).dates.calendars['gregorian']
     date_format = gregorian.dateFormats['medium'].formats[None]
     date_format.pattern = value
 
 
 def setDefaultTimeFormat(localeid, value):
-    gregorian = locales.getLocale(*localeid).dates.calendars[u'gregorian']
+    gregorian = locales.getLocale(*localeid).dates.calendars['gregorian']
     time_format = gregorian.timeFormats['medium'].formats[None]
     time_format.pattern = value
 

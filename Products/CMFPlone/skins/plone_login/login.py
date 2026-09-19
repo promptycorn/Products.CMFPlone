@@ -21,7 +21,7 @@ site_properties = context.portal_properties.site_properties
 external_login_url = site_properties.getProperty('external_login_url')
 external_login_iframe = site_properties.getProperty('external_login_iframe')
 if not external_login_url or external_login_iframe:
-    return context.restrictedTraverse('login_form')()
+    return request.RESPONSE.redirect(context.absolute_url() + '/login_form')
 
 # Handle login on this portal where login is external
 next = request.URL1 + '/logged_in'

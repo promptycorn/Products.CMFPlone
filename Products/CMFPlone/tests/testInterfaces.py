@@ -86,7 +86,7 @@ class InterfaceTest(ZopeTestCase.ZopeTestCase):
         try:
             verifyClass(interface, klass)
         except (BrokenImplementation, DoesNotImplement,
-                BrokenMethodImplementation), errmsg:
+                BrokenMethodImplementation) as errmsg:
             self.fail('The class %s does not implement %s correctly: \n%s'
                       % (dottedName(klass), dottedName(interface), errmsg))
 
@@ -106,7 +106,7 @@ class InterfaceTest(ZopeTestCase.ZopeTestCase):
             verifyObject(interface, instance)
         except (BrokenImplementation,
                 DoesNotImplement,
-                BrokenMethodImplementation), errmsg:
+                BrokenMethodImplementation) as errmsg:
             self.fail(
                 'The instance of %s does not implement %s correctly: \n%s'
                     % (dottedName(instance), dottedName(interface), errmsg))
@@ -192,7 +192,7 @@ class zope_interface_test(ZopeTestCase.ZopeTestCase):
         try:
             verifyClass(interface, klass)
         except (BrokenImplementation, DoesNotImplement,
-                BrokenMethodImplementation), errmsg:
+                BrokenMethodImplementation) as errmsg:
             self.fail('The class %s does not implement %s correctly: \n%s'
                       % (dottedName(klass), dottedName(interface), errmsg))
 
@@ -211,7 +211,7 @@ class zope_interface_test(ZopeTestCase.ZopeTestCase):
         try:
             verifyObject(interface, instance)
         except (BrokenImplementation, DoesNotImplement,
-                BrokenMethodImplementation), errmsg:
+                BrokenMethodImplementation) as errmsg:
             self.fail('The instance of %s does not provide %s correctly: \n%s'
                       % (dottedName(instance), dottedName(interface), errmsg))
 

@@ -1,5 +1,5 @@
 from Products.CMFDefault.MetadataTool import MetadataTool as BaseTool
-from App.class_init import InitializeClass
+from AccessControl.class_init import InitializeClass
 from AccessControl import ClassSecurityInfo
 from Products.CMFPlone.PloneBaseTool import PloneBaseTool
 

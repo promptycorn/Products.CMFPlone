@@ -7,14 +7,14 @@ from Products.CMFPlone.tests import PloneTestCase
 class TestBatch(PloneTestCase.PloneTestCase):
 
     def test_batch_no_lazy(self):
-        batch = Batch(range(100), size=10, start=10)
+        batch = Batch(list(range(100)), size=10, start=10)
         self.assertEqual([b for b in batch],
             [10, 11, 12, 13, 14, 15, 16, 17, 18, 19])
 
     def test_batch_lazy_map(self):
         def get(key):
             return key
-        sequence = LazyMap(get, range(80, 90), actual_result_count=95)
+        sequence = LazyMap(get, list(range(80, 90)), actual_result_count=95)
         batch = Batch(sequence, size=10, start=80)
         self.assertEqual([b for b in batch],
             [80, 81, 82, 83, 84, 85, 86, 87, 88, 89])

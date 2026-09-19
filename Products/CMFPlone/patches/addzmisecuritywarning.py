@@ -22,4 +22,5 @@ new = orig[:pos] + ADD_SECURITY_WARNING + orig[pos:]
 
 # Modify the manage_main
 normal.edited_source = new
-normal._v_cooked = normal.cook()
+if hasattr(normal, 'cook'):
+    normal._v_cooked = normal.cook()

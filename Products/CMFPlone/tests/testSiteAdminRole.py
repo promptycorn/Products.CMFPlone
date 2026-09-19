@@ -222,7 +222,7 @@ class TestSiteAdministratorRole(PloneTestCase.PloneTestCase):
 
         site = self.portal
         errors = []
-        for p, expected_value in sorted(expected.items(), key=lambda x: x[0]):
+        for p, expected_value in sorted(list(expected.items()), key=lambda x: x[0]):
             enabled = 'Site Administrator' in rolesForPermissionOn(p, site)
             if expected_value and not enabled:
                 errors.append('%s: should be enabled' % p)
