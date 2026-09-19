@@ -1,6 +1,8 @@
 from setuptools import setup, find_packages
+import os
 
-version = '4.3.20'
+version = open(os.path.join(os.path.dirname(__file__),
+                            'Products/CMFPlone/version.txt')).read().strip()
 
 setup(name='Products.CMFPlone',
       version=version,
