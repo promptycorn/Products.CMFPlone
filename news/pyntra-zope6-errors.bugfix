@@ -1,0 +1,3 @@
+Preserve the exception object with nocall in the legacy error template.
+Zope 6 HTTP exceptions are WSGI callables and cannot be invoked without
+an environment and response callback during TAL path evaluation.

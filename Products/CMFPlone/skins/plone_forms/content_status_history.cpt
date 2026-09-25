@@ -171,7 +171,7 @@
 
                             <td>
                               <span tal:condition="not: item_size"> &nbsp; </span>
-                              <span tal:condition="python:item_size>0"
+                              <span tal:condition="item_size"
                                     tal:content="item_size"
                                     tal:attributes="class item_wf_state_class"> size </span>
                             </td>

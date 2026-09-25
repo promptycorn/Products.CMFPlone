@@ -18,7 +18,7 @@
      tal:define="err_type options/error_type|nothing;
                  err_message options/error_message|nothing;
                  err_tb options/error_tb|nothing;
-                 err_value options/error_value|nothing;
+                 err_value nocall: options/error_value|nothing;
                  err_traceback options/error_traceback|nothing;
                  err_log_url options/error_log_url|nothing;
                  err_log_id options/error_log_id|nothing;

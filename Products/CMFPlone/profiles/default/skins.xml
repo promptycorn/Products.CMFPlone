@@ -11,8 +11,6 @@
  <object name="cmf_legacy" meta_type="Filesystem Directory View"
     directory="Products.CMFPlone:skins/cmf_legacy"/>
  <object name="custom" meta_type="Folder"/>
- <object name="mimetypes_icons" meta_type="Filesystem Directory View"
-    directory="Products.MimetypesRegistry:skins/mimetypes_icons"/>
  <object name="plone_3rdParty" meta_type="Filesystem Directory View"
     directory="Products.CMFPlone:skins/plone_3rdParty"/>
  <object name="plone_content" meta_type="Filesystem Directory View"
@@ -44,7 +42,6 @@
   <layer name="ATContentTypes"/>
   <layer name="referencebrowser"/>
   <layer name="archetypes"/>
-  <layer name="mimetypes_icons"/>
   <layer name="plone_ecmascript"/>
   <layer name="plone_wysiwyg"/>
   <layer name="plone_prefs"/>
